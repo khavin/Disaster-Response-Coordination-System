@@ -128,8 +128,8 @@ let setupQueries = {
         PRIMARY KEY (\`vId\`, \`certId\`)
       );`,
   "Foreign Keys": [
-    "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
-    "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`rId`) REFERENCES `Resource` (`rId`);",
+    // "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
+    // "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`rId`) REFERENCES `Resource` (`rId`);",
     "ALTER TABLE `Location` ADD FOREIGN KEY (`mId`) REFERENCES `Volunteer` (`vId`);",
     "ALTER TABLE `ResourceRequests` ADD FOREIGN KEY (`incId`) REFERENCES `Incident` (`incId`);",
     "ALTER TABLE `ResourceRequests` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
@@ -158,26 +158,25 @@ let setupQueries = {
   "Commit Transaction": "COMMIT;",
 };
 
-con.connect(function (err) {
-  if (err) throw err;
-  console.log("Connected to MySQL server.");
+console.log("Connected to MySQL server.");
 
-  for (let q in setupQueries) {
-    console.log("Executing -- " + q);
-    if (q == "Foreign Keys") {
-      // Execute Foreign Keys array
-      console.log("Adding foreign keys ...");
-      for (let fkQuery of setupQueries[q]) {
-        con.query(fkQuery, function (err, result) {
-          if (err) throw err;
-        });
-      }
-      console.log("Done -- Added " + setupQueries[q].length + "foreign keys.");
-    } else {
-      con.query(setupQueries[q], function (err, result) {
+for (let q in setupQueries) {
+  console.log("Executing -- " + q);
+  if (q == "Foreign Keys") {
+    // Execute Foreign Keys array
+    console.log("Adding foreign keys ...");
+    for (let fkQuery of setupQueries[q]) {
+      con.query(fkQuery, function (err, result) {
         if (err) throw err;
-        console.log("Done -- " + q);
       });
     }
+    console.log("Done -- Added " + setupQueries[q].length + "foreign keys.");
+  } else {
+    con.query(setupQueries[q], function (err, result) {
+      if (err) throw err;
+      console.log("Done -- " + q);
+    });
   }
-});
+}
+
+con.end();
