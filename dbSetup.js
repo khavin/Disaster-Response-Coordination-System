@@ -23,7 +23,7 @@ let setupQueries = {
         \`city\` varchar(255),
         \`state\` varchar(255),
         \`zipcode\` varchar(255) NOT NULL,
-        \`rId\` integer NOT NULL,
+        \`rId\` varchar(20) NOT NULL,
         \`locId\` integer NOT NULL,
         \`dLNo\` varchar(255),
         \`passwordHash\` varchar(255) NOT NULL,
@@ -37,7 +37,7 @@ let setupQueries = {
         \`city\` varchar(255) NOT NULL,
         \`state\` varchar(255) NOT NULL,
         \`zipcode\` varchar(255) NOT NULL,
-        \`mId\` integer NOT NULL
+        \`mId\` integer
       );`,
   "Create Incident Table": `CREATE TABLE \`Incident\` (
         \`incId\` integer PRIMARY KEY,
@@ -61,22 +61,22 @@ let setupQueries = {
       );`,
   "Create RequestInfo Table": `CREATE TABLE \`RequestInfo\` (
         \`reqId\` integer,
-        \`rId\` integer,
+        \`rId\` varchar(20),
         \`quantity\` integer NOT NULL,
         PRIMARY KEY (\`reqId\`, \`rId\`)
       );`,
   "Create Resource Table": `CREATE TABLE \`Resource\` (
-        \`rId\` integer PRIMARY KEY,
+        \`rId\` varchar(20) PRIMARY KEY,
         \`type\` varchar(255) NOT NULL,
         \`typeNumber\` integer NOT NULL
       );`,
   "Create EducationReq Table": `CREATE TABLE \`EducationRequirements\` (
-        \`rId\` integer,
+        \`rId\` varchar(20),
         \`eId\` integer,
         PRIMARY KEY (\`rId\`, \`eId\`)
       );`,
   "Create ProfesionalReq Table": `CREATE TABLE \`ProfessionalRequirements\` (
-        \`rId\` integer,
+        \`rId\` varchar(20),
         \`profId\` integer,
         \`reqExp\` integer,
         PRIMARY KEY (\`rId\`, \`profId\`)
@@ -94,7 +94,7 @@ let setupQueries = {
         \`name\` varchar(255) NOT NULL
       );`,
   "Create CertReq Table": `CREATE TABLE \`CertRequirements\` (
-        \`rId\` integer,
+        \`rId\` varchar(20),
         \`certId\` integer,
         PRIMARY KEY (\`rId\`, \`certId\`)
       );`,
@@ -103,7 +103,7 @@ let setupQueries = {
         \`name\` varchar(255) NOT NULL
       );`,
   "Create TrainingReq Table": `CREATE TABLE \`TrainingRequirements\` (
-        \`rId\` integer,
+        \`rId\` varchar(20),
         \`trainId\` integer,
         PRIMARY KEY (\`rId\`, \`trainId\`)
       );`,
@@ -128,8 +128,8 @@ let setupQueries = {
         PRIMARY KEY (\`vId\`, \`certId\`)
       );`,
   "Foreign Keys": [
-    // "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
-    // "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`rId`) REFERENCES `Resource` (`rId`);",
+    "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
+    "ALTER TABLE `Volunteer` ADD FOREIGN KEY (`rId`) REFERENCES `Resource` (`rId`);",
     "ALTER TABLE `Location` ADD FOREIGN KEY (`mId`) REFERENCES `Volunteer` (`vId`);",
     "ALTER TABLE `ResourceRequests` ADD FOREIGN KEY (`incId`) REFERENCES `Incident` (`incId`);",
     "ALTER TABLE `ResourceRequests` ADD FOREIGN KEY (`locId`) REFERENCES `Location` (`locId`);",
@@ -170,7 +170,7 @@ for (let q in setupQueries) {
         if (err) throw err;
       });
     }
-    console.log("Done -- Added " + setupQueries[q].length + "foreign keys.");
+    console.log("Done -- Added " + setupQueries[q].length + " foreign keys.");
   } else {
     con.query(setupQueries[q], function (err, result) {
       if (err) throw err;
