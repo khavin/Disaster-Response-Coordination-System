@@ -17,6 +17,158 @@ con.query("USE DisasterResponseCoordination;", function (err) {
   if (err) throw err;
 });
 
+// Resources info
+let resourcesInfo = {
+  "12-509-1079": {
+    name: "Registered Nurse",
+    types: 3,
+    educationReq: {
+      1: ["Bachelor of Science in Nursing"],
+      2: ["Nursing - Specialty Preparation"],
+      3: ["Graduate of an accredited nursing program"],
+    },
+    trainingReq: {
+      1: [],
+      2: [],
+      3: [
+        "Introduction to the Incident Command System, ICS-100",
+        "S-200: Basic Incident Command System for Initial Response, ICS-200",
+        "National Incident Management System, An Introduction, IS-700",
+        "National Response Framework, An Introduction, IS-800",
+        "Training in accordance with Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Materials Awareness",
+        "Training in accordance with OSHA 29 CFR Part 1910.134: Respiratory Protection",
+        "Training in accordance with OSHA 29 CFR Part 1910.1030: Bloodborne Pathogens",
+      ],
+    },
+    experienceReq: {
+      1: [
+        {
+          name: "Supervisory position within a healthcare setting",
+          years: 3,
+        },
+      ],
+      2: [
+        {
+          name: "Experience in the specialty practice area",
+          years: 1,
+        },
+      ],
+      3: [
+        {
+          name: "Experience in a clinical practice setting",
+          years: 2,
+        },
+      ],
+    },
+    certificationReq: {
+      1: [],
+      2: [],
+      3: [
+        "State, District of Columbia or US territory-granted active status of legal authority to function as an RN without restrictions",
+      ],
+    },
+  },
+  "4-509-1481": {
+    name: "Firefighter (Structural)",
+    types: 2,
+    educationReq: {
+      1: [],
+      2: [],
+    },
+    trainingReq: {
+      1: [],
+      2: [
+        "Introduction to the Incident Command System, ICS-100",
+        "S-200: Basic Incident Command System for Initial Response, ICS-200",
+        "National Incident Management System, An Introduction, IS-700",
+        "National Response Framework, An Introduction, IS-800",
+        "Training in accordance with NFPA 472: Standard for Competence of Responders to Hazardous Materials/Weapons of Mass Destruction Incidents Operations Level, or equivalent basic instruction on responding to and operating in a chemical, biological, radiological, nuclear and explosive (CBRNE) incident",
+        "Training in accordance with NFPA 1001: Standards for Fire Fighter Level I, or equivalent",
+        "Additional Authority Having Jurisdiction (AHJ)-determined training",
+      ],
+    },
+    experienceReq: {
+      1: [],
+      2: [
+        {
+          name: "Relevant, full-time firefighting experience, or equivalent, as the AHJ determines",
+          years: 0,
+        },
+      ],
+    },
+    certificationReq: {
+      1: [
+        "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level II",
+      ],
+      2: [
+        "AHJ certification equivalent to NFPA 472: Standard for Competence of Responders to Hazardous Materials/Weapons of Mass Destruction Incidents Operations Level or Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Waste Operations and Emergency Response",
+        "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level I",
+        "Any other AHJ-determined certification and recertification requirements",
+      ],
+    },
+  },
+  "3-509-1011": {
+    name: "Ambulance Operator",
+    types: 2,
+    educationReq: {
+      1: [
+        "Completion of a state-approved Emergency Medical Technician (EMT) program, or completion of the minimum terminal learning objectives for EMT as defined by the NHTSA EMS Education Standards",
+      ],
+      2: [
+        "High School Diploma",
+        "A state-approved Emergency Medical Responder (EMR) program, or completion of the minimum terminal learning objectives for EMR as defined by the National Highway Traffic Safety Administration (NHTSA) National Emergency Medical Services (EMS) Education Standards",
+      ],
+    },
+    trainingReq: {
+      1: [],
+      2: [
+        "Introduction to the Incident Command System, ICS-100",
+        "S-200: Basic Incident Command System for Initial Response, ICS-200",
+        "National Incident Management System, An Introduction, IS-700",
+        "National Response Framework, An Introduction, IS-800",
+        "Training in accordance with Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Materials Awareness",
+        "Training in accordance with OSHA 29 CFR Part 1910.134: Respiratory Protection",
+        "Training in accordance with OSHA 29 CFR Part 1910.1030: Bloodborne Pathogens",
+        "Authority Having Jurisdiction (AHJ) Emergency Vehicle Operators Course (EVOC)",
+      ],
+    },
+    experienceReq: {
+      1: [],
+      2: [
+        {
+          name: "Emergency driving",
+          years: 2,
+        },
+        { name: "Ambulance Operator", years: 1 },
+      ],
+    },
+    certificationReq: {
+      1: ["AHJ-certified EMT"],
+      2: [
+        "Valid state driver’s license, with appropriate endorsements where applicable",
+        "AHJ-certified EMR",
+        "AVOC, EVOC, or other recognized equivalent certification, as applicable",
+      ],
+    },
+  },
+  0: {
+    name: "General",
+    types: 1,
+    educationReq: {
+      1: [],
+    },
+    trainingReq: {
+      1: [],
+    },
+    experienceReq: {
+      1: [],
+    },
+    certificationReq: {
+      1: [],
+    },
+  },
+};
+
 function insertData(sql, values, tableName) {
   con.query(sql, [values], function (err) {
     if (err) throw err;
@@ -28,34 +180,14 @@ function insertData(sql, values, tableName) {
 
 // Create resources
 function createResources() {
-  // Add resources
-  let resources = {
-    "12-509-1079": {
-      name: "Registered Nurse",
-      types: 3,
-    },
-    "4-509-1481": {
-      name: "Firefighter (Structural)",
-      types: 2,
-    },
-    "3-509-1011": {
-      name: "Ambulance Operator",
-      types: 2,
-    },
-    0: {
-      name: "General",
-      types: 1,
-    },
-  };
-
   // Generated resources
   let gResources = [];
 
-  for (let key in resources) {
+  for (let key in resourcesInfo) {
     // create a separate resource for each type
-    for (let i = 0; i < resources[key]["types"]; i++) {
+    for (let i = 0; i < resourcesInfo[key]["types"]; i++) {
       // resource object to be inserted into db
-      let r = [key + "-" + i, resources[key]["name"], i + 1];
+      let r = [key + "-" + i, resourcesInfo[key]["name"], i + 1];
       gResources.push(r);
     }
   }
