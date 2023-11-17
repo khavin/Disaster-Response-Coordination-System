@@ -169,6 +169,55 @@ let resourcesInfo = {
   },
 };
 
+let educationSet = convertReqToSet("educationReq");
+let trainingSet = convertReqToSet("trainingReq");
+let certSet = convertReqToSet("certificationReq");
+let experienceSet = convertReqToSet("experienceReq");
+
+let educationIdNameMapping = createMapFromArray(educationSet);
+let trainingIdNameMapping = createMapFromArray(trainingSet);
+let certIdNameMapping = createMapFromArray(certSet);
+let experienceIdNameMapping = createMapFromArray(experienceSet);
+
+// Convert resource object to a set
+function convertReqToSet(name) {
+  // Iterate through the resource
+  let dataSet = [];
+  for (let r in resourcesInfo) {
+    for (let e in resourcesInfo[r][name]) {
+      dataSet = dataSet.concat(getArray(resourcesInfo[r][name][e], name));
+    }
+  }
+
+  return [...new Set(dataSet)];
+}
+
+// Convert object array to string array
+function getArray(data, name) {
+  if (name == "experienceReq") {
+    let convertedData = [];
+    for (let e of data) {
+      convertedData.push(e["name"]);
+    }
+    return convertedData;
+  } else {
+    return data;
+  }
+}
+
+// Create a map of array elements
+function createMapFromArray(data) {
+  let map = {};
+
+  let i = 0;
+  for (let e of data) {
+    map[e] = i;
+    i++;
+  }
+
+  return map;
+}
+
 function insertData(sql, values, tableName) {
   con.query(sql, [values], function (err) {
     if (err) throw err;
@@ -341,12 +390,100 @@ function createVolunteer(id) {
   };
 }
 
+// Create entry object
+function createEntryObject(reqMapping) {
+  let data = [];
+  for (let e in reqMapping) {
+    data.push([reqMapping[e], e]);
+  }
+
+  return data;
+}
+
+// Create requirement objects
+function createReqObject(reqMapping, name) {
+  let data = [];
+
+  // Iterate through resources
+  for (let r in resourcesInfo) {
+    // Go through different types of a resource
+    for (let type in resourcesInfo[r][name]) {
+      // For a type 1 resource, include requirements of the higher count resources
+      for (let t = type; t <= resourcesInfo[r]["types"]; t++) {
+        // Include requirements
+        for (let entry of resourcesInfo[r][name][t]) {
+          if (name == "experienceReq") {
+            data.push([
+              r + "-" + (type - 1),
+              reqMapping[entry["name"]],
+              entry["years"],
+            ]);
+          } else {
+            data.push([r + "-" + (type - 1), reqMapping[entry]]);
+          }
+        }
+      }
+    }
+  }
+
+  return data;
+}
+
 // =========================== Start inserting data ================================
 
 // Insert Resource information
 let resourcesSql = insertStatement.replace("{}", "Resource");
 let resources = createResources();
 insertData(resourcesSql, resources, "Resource");
+
+// Insert Education entries
+let educationSql = insertStatement.replace("{}", "Education");
+let educationDBData = createEntryObject(educationIdNameMapping);
+insertData(educationSql, educationDBData, "Education");
+
+// Insert Training entries
+let trainingSql = insertStatement.replace("{}", "Training");
+let trainingDBData = createEntryObject(trainingIdNameMapping);
+insertData(trainingSql, trainingDBData, "Training");
+
+// Insert Certification entries
+let certSql = insertStatement.replace("{}", "Certification");
+let certDBData = createEntryObject(certIdNameMapping);
+insertData(certSql, certDBData, "Certification");
+
+// Insert Profession entries
+let professionSql = insertStatement.replace("{}", "Profession");
+let professionDBData = createEntryObject(experienceIdNameMapping);
+insertData(professionSql, professionDBData, "Profession");
+
+// Insert Education requirements
+let educationReqSql = insertStatement.replace("{}", "EducationRequirements");
+let educationReqDBData = createReqObject(
+  educationIdNameMapping,
+  "educationReq"
+);
+insertData(educationReqSql, educationReqDBData, "EducationRequirements");
+
+// Insert Training requirements
+let trainingReqSql = insertStatement.replace("{}", "TrainingRequirements");
+let trainingReqDBData = createReqObject(trainingIdNameMapping, "trainingReq");
+insertData(trainingReqSql, trainingReqDBData, "TrainingRequirements");
+
+// Insert Profession requirements
+let professionReqSql = insertStatement.replace(
+  "{}",
+  "ProfessionalRequirements"
+);
+let professionReqDBData = createReqObject(
+  experienceIdNameMapping,
+  "experienceReq"
+);
+insertData(professionReqSql, professionReqDBData, "ProfessionalRequirements");
+
+// Insert Certification requirements
+let certReqSql = insertStatement.replace("{}", "CertRequirements");
+let certReqDBData = createReqObject(certIdNameMapping, "certificationReq");
+insertData(certReqSql, certReqDBData, "CertRequirements");
 
 // Insert Location information
 let locationsSql = insertStatement.replace("{}", "Location");

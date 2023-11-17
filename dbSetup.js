@@ -83,15 +83,15 @@ let setupQueries = {
       );`,
   "Create Education Table": `CREATE TABLE \`Education\` (
         \`eId\` integer PRIMARY KEY,
-        \`name\` varchar(255) NOT NULL
+        \`name\` TEXT NOT NULL
       );`,
   "Create Prof Table": `CREATE TABLE \`Profession\` (
         \`profId\` integer PRIMARY KEY,
-        \`name\` varchar(255) NOT NULL
+        \`name\` TEXT NOT NULL
       );`,
   "Create Certification Table": `CREATE TABLE \`Certification\` (
         \`certId\` integer PRIMARY KEY,
-        \`name\` varchar(255) NOT NULL
+        \`name\` TEXT NOT NULL
       );`,
   "Create CertReq Table": `CREATE TABLE \`CertRequirements\` (
         \`rId\` varchar(20),
@@ -100,7 +100,7 @@ let setupQueries = {
       );`,
   "Create Training Table": `CREATE TABLE \`Training\` (
         \`trainId\` integer PRIMARY KEY,
-        \`name\` varchar(255) NOT NULL
+        \`name\` TEXT NOT NULL
       );`,
   "Create TrainingReq Table": `CREATE TABLE \`TrainingRequirements\` (
         \`rId\` varchar(20),
