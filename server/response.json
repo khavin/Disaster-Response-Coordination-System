@@ -1,0 +1,84 @@
+[
+  [
+    { "type": "General" },
+    { "type": "Registered Nurse" },
+    { "type": "Ambulance Operator" },
+    { "type": "Firefighter (Structural)" }
+  ],
+  [
+    {
+      "name": "State, District of Columbia or US territory-granted active status of legal authority to function as an RN without restrictions"
+    },
+    {
+      "name": "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level II"
+    },
+    {
+      "name": "AHJ certification equivalent to NFPA 472: Standard for Competence of Responders to Hazardous Materials/Weapons of Mass Destruction Incidents Operations Level or Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Waste Operations and Emergency Response"
+    },
+    {
+      "name": "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level I"
+    },
+    {
+      "name": "Any other AHJ-determined certification and recertification requirements"
+    },
+    { "name": "AHJ-certified EMT" },
+    {
+      "name": "Valid state driver’s license, with appropriate endorsements where applicable"
+    },
+    { "name": "AHJ-certified EMR" },
+    {
+      "name": "AVOC, EVOC, or other recognized equivalent certification, as applicable"
+    }
+  ],
+  [
+    { "name": "Bachelor of Science in Nursing" },
+    { "name": "Nursing - Specialty Preparation" },
+    { "name": "Graduate of an accredited nursing program" },
+    {
+      "name": "Completion of a state-approved Emergency Medical Technician (EMT) program, or completion of the minimum terminal learning objectives for EMT as defined by the NHTSA EMS Education Standards"
+    },
+    { "name": "High School Diploma" },
+    {
+      "name": "A state-approved Emergency Medical Responder (EMR) program, or completion of the minimum terminal learning objectives for EMR as defined by the National Highway Traffic Safety Administration (NHTSA) National Emergency Medical Services (EMS) Education Standards"
+    }
+  ],
+  [
+    { "name": "Supervisory position within a healthcare setting" },
+    { "name": "Experience in the specialty practice area" },
+    { "name": "Experience in a clinical practice setting" },
+    {
+      "name": "Relevant, full-time firefighting experience, or equivalent, as the AHJ determines"
+    },
+    { "name": "Emergency driving" },
+    { "name": "Ambulance Operator" }
+  ],
+  [
+    { "name": "Introduction to the Incident Command System, ICS-100" },
+    {
+      "name": "S-200: Basic Incident Command System for Initial Response, ICS-200"
+    },
+    { "name": "National Incident Management System, An Introduction, IS-700" },
+    { "name": "National Response Framework, An Introduction, IS-800" },
+    {
+      "name": "Training in accordance with Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Materials Awareness"
+    },
+    {
+      "name": "Training in accordance with OSHA 29 CFR Part 1910.134: Respiratory Protection"
+    },
+    {
+      "name": "Training in accordance with OSHA 29 CFR Part 1910.1030: Bloodborne Pathogens"
+    },
+    {
+      "name": "Training in accordance with NFPA 472: Standard for Competence of Responders to Hazardous Materials/Weapons of Mass Destruction Incidents Operations Level, or equivalent basic instruction on responding to and operating in a chemical, biological, radiological, nuclear and explosive (CBRNE) incident"
+    },
+    {
+      "name": "Training in accordance with NFPA 1001: Standards for Fire Fighter Level I, or equivalent"
+    },
+    {
+      "name": "Additional Authority Having Jurisdiction (AHJ)-determined training"
+    },
+    {
+      "name": "Authority Having Jurisdiction (AHJ) Emergency Vehicle Operators Course (EVOC)"
+    }
+  ]
+]
