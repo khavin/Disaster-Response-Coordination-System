@@ -299,8 +299,8 @@ function createLocations() {
 function createTeamMembersAsVolunteers() {
   return [
     Object.values({
-      vId: 0,
       name: "Vineela Yerrabelli",
+      email: "vineela@vt.edu",
       gender: "female",
       age: faker.number.int({ min: 18, max: 35 }),
       phoneNumber: faker.helpers.replaceSymbolWithNumber("(540)-###-####"),
@@ -317,8 +317,8 @@ function createTeamMembersAsVolunteers() {
       role: "admin",
     }),
     Object.values({
-      vId: 1,
       name: "Khavin Krishnan Kalpana",
+      email: "khavin@vt.edu",
       gender: "male",
       age: faker.number.int({ min: 18, max: 35 }),
       phoneNumber: faker.helpers.replaceSymbolWithNumber("(540)-###-####"),
@@ -335,8 +335,8 @@ function createTeamMembersAsVolunteers() {
       role: "admin",
     }),
     Object.values({
-      vId: 2,
       name: "Nayaab Azim",
+      email: "nayaab@vt.edu",
       gender: "female",
       age: faker.number.int({ min: 18, max: 35 }),
       phoneNumber: faker.helpers.replaceSymbolWithNumber("(540)-###-####"),
@@ -357,7 +357,7 @@ function createTeamMembersAsVolunteers() {
 
 function updateMIDsInLocation() {
   for (let i = 0; i < locations.length; i++) {
-    let q = "update Location set mId = " + i + " where locId = " + i + ";";
+    let q = "update Location set mId = " + i + 1 + " where locId = " + i + ";";
     con.query(q, function (err) {
       if (err) throw err;
     });
@@ -371,8 +371,8 @@ function createVolunteer(id) {
   let loc = faker.helpers.arrayElement(locations);
 
   return {
-    vId: id,
     name: faker.person.fullName(),
+    email: faker.internet.email(),
     gender: faker.person.sex(),
     age: faker.number.int({ min: 18, max: 35 }),
     phoneNumber: faker.helpers.replaceSymbolWithNumber("(540)-###-####"),
@@ -491,7 +491,9 @@ let locations = createLocations();
 insertData(locationsSql, locations, "Location");
 
 // Insert Volunteer information
-let volunteerSql = insertStatement.replace("{}", "Volunteer");
+let volunteerSql =
+  "INSERT INTO Volunteer (`name`,`email`,`gender`,`age`,`phoneNumber`,`apartmentNumber`,`street`,`city`,`state`,`zipcode`,`rId`,`locId`,`dLNo`,`passwordHash`,`salt`,`role`) VALUES ? ";
+
 // Volunteers to generate
 let n = 100000;
 // Get admin values

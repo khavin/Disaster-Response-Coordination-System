@@ -13,8 +13,9 @@ let setupQueries = {
   "Create DB": "CREATE DATABASE DisasterResponseCoordination;",
   "Select DB": "USE DisasterResponseCoordination;",
   "Create Volunteer Table": `CREATE TABLE \`Volunteer\` (
-        \`vId\` integer PRIMARY KEY,
+        \`vId\` integer PRIMARY KEY auto_increment,
         \`name\` varchar(255) NOT NULL,
+        \`email\` varchar(255) NOT NULL,
         \`gender\` varchar(255),
         \`age\` integer NOT NULL,
         \`phoneNumber\` varchar(255) NOT NULL,
