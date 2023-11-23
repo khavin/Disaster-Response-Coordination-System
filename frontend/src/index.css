@@ -1,0 +1,63 @@
+:root {
+  --primary-color: #a442f5;
+}
+body {
+  font-family: "Roboto";
+  margin: 0;
+}
+header {
+  display: flex;
+  padding: 1rem 1rem;
+  border-bottom: 3px solid black;
+}
+.site-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+.homeContainer {
+  margin: 1rem;
+}
+.userRegisterButtons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.registerButton {
+  background-color: var(--primary-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+}
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 10rem 0;
+}
+.signUpForm {
+  margin: 3rem 0;
+}
+.loginTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0;
+}
+.loginForm > form {
+  font-size: 1.5rem;
+}
+.formInput {
+  width: 30rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.formSelect {
+  width: 10rem;
+}
+.multi-select {
+  width: 30.5rem;
+}
