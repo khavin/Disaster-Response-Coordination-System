@@ -41,7 +41,7 @@ let setupQueries = {
         \`mId\` integer
       );`,
   "Create Incident Table": `CREATE TABLE \`Incident\` (
-        \`incId\` integer PRIMARY KEY,
+        \`incId\` integer PRIMARY KEY auto_increment,
         \`locId\` integer NOT NULL,
         \`startDate\` varchar(255),
         \`endDate\` varchar(255)
@@ -54,7 +54,7 @@ let setupQueries = {
         PRIMARY KEY (\`vId\`, \`incId\`)
       );`,
   "Create ResourceRequests Table": `CREATE TABLE \`ResourceRequests\` (
-        \`reqId\` integer PRIMARY KEY,
+        \`reqId\` integer PRIMARY KEY auto_increment,
         \`incId\` integer NOT NULL,
         \`locId\` integer NOT NULL,
         \`message\` varchar(255),

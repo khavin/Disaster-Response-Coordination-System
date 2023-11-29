@@ -10,6 +10,9 @@ header {
   padding: 1rem 1rem;
   border-bottom: 3px solid black;
 }
+.content {
+  margin: 1.5rem;
+}
 .site-title {
   font-size: 1.25rem;
   font-weight: 500;
@@ -31,6 +34,9 @@ header {
   cursor: pointer;
   display: flex;
   justify-content: center;
+}
+.registerButton > button {
+  color: white;
 }
 .loginForm {
   display: flex;
@@ -60,4 +66,160 @@ header {
 }
 .multi-select {
   width: 30.5rem;
+}
+.dashboardTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.greetingsPanel {
+  display: flex;
+  justify-content: space-between;
+}
+.greetings {
+  margin: 1.25rem 0;
+}
+.createButton {
+  background-color: var(--primary-color);
+  padding: 1rem;
+  border-radius: 1rem;
+  display: inline-block;
+  color: white;
+  cursor: pointer;
+}
+.incidentCreateContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.incidentsSelectionTab {
+  color: var(--primary-color);
+  padding: 0.75rem;
+  border-radius: 1rem;
+  display: inline-block;
+  background-color: white;
+  cursor: pointer;
+  border: 1px solid var(--primary-color);
+}
+.selectedTab {
+  background-color: var(--primary-color);
+  color: white;
+}
+.widgetRow {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.widget {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  width: 6rem;
+  height: 7rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: 1px solid var(--primary-color);
+}
+.widget:hover {
+  background-color: white;
+  color: var(--primary-color);
+}
+.widgetCount {
+  font-size: 2rem;
+}
+.resourceEmoji {
+  font-size: 2rem;
+}
+.tableHeader th {
+  background-color: var(--primary-color);
+  color: white;
+}
+.rCountWidget {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  margin-right: 0.25rem;
+}
+.displayResourceRow {
+  margin: 0.5rem 0;
+}
+.displayResourceContainer {
+  display: flex;
+  flex-direction: column;
+  border: 5px solid var(--primary-color);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+.displayAllocRes {
+  display: flex;
+}
+.rCountWidNumber {
+  color: yellow;
+}
+.actionButtonRow {
+  display: flex;
+}
+.actionButton {
+  background-color: var(--primary-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  margin-right: 0.25rem;
+  border: 1px solid var(--primary-color);
+}
+.actionButton:hover {
+  color: var(--primary-color);
+  background-color: white;
+}
+.location-dropDown {
+  color: black;
+}
+.resourceForm {
+  margin: 1rem 0;
+}
+.reqFormSubmitButton {
+  width: 8rem;
+}
+.reqFormInput {
+  width: 2rem;
+}
+.reqFormRow {
+  margin: 0.5rem 0;
+}
+.reqForm {
+  border: 5px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+.reqFormContainer {
+  display: flex;
+}
+.allowDenyButtons {
+  border: 3px solid black;
+  padding: 0.5rem;
+  margin-right: 0.25rem;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+.actionButtonsRow {
+  margin: 1rem 0;
+  display: flex;
+}
+.dummyButton {
+  background-color: var(--primary-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  color: white;
+  display: flex;
+  justify-content: center;
+  margin-right: 0.25rem;
+  border: 1px solid var(--primary-color);
 }
