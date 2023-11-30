@@ -1,5 +1,8 @@
 import mysql2 from "mysql2";
 import express from "express";
+import cors from "cors";
+import * as auth from "./auth.js";
+import * as util from "./utilities.js";
 
 const connection = mysql2.createConnection({
   host: "localhost",
@@ -8,106 +11,29 @@ const connection = mysql2.createConnection({
   password: "admin123",
   multipleStatements: true,
 });
+
 //Getting Location Ids
-let loc = `Select locId, city from Location;`;
-const locationIdNameMapping = {};
-connection.query(loc, (err, result) => {
-  if (err) {
-    throw err;
-  } else {
-    // console.log(result);
-    const lIds = result;
-    console.log(lIds);
-
-    for (let entry of lIds) {
-      locationIdNameMapping[entry["city"]] = entry["locId"];
-    }
-
-    console.log(locationIdNameMapping);
-  }
-});
+const locationIdNameMapping = util.getLocationIdNameMapping(connection);
 
 //Getting Education Ids
-var educationIds = `Select Distinct * from Education;`;
-const educationIdNameMapping = {};
-
-connection.query(educationIds, (err, result) => {
-  if (err) {
-    throw err;
-  } else {
-    // console.log(result);
-    const eIds = result;
-    console.log(eIds);
-
-    for (let entry of eIds) {
-      educationIdNameMapping[entry["name"]] = entry["eId"];
-    }
-
-    console.log(educationIdNameMapping);
-  }
-});
+const educationIdNameMapping = util.getEduIdNameMapping(connection);
 
 //Getting profession Ids
-var professionIds = `Select Distinct * from Profession`;
-const professionIdNameMapping = {};
+const professionIdNameMapping = util.getProfIdNameMapping(connection);
 
-connection.query(professionIds, (err, result) => {
-  if (err) {
-    throw err;
-  } else {
-    // console.log(result);
-    const pIds = result;
-    // console.log(eIds);
-
-    for (let entry of pIds) {
-      professionIdNameMapping[entry["name"]] = entry["profId"];
-    }
-
-    console.log(professionIdNameMapping);
-  }
-});
 //Getting training Ids
-var trainingIds = `Select Distinct * from Training`;
-const trainingIdNameMapping = {};
-
-connection.query(trainingIds, (err, result) => {
-  if (err) {
-    throw err;
-  } else {
-    // console.log(result);
-    const tIds = result;
-    // console.log(eIds);
-
-    for (let entry of tIds) {
-      trainingIdNameMapping[entry["name"]] = entry["trainId"];
-    }
-
-    console.log(trainingIdNameMapping);
-  }
-});
+const trainingIdNameMapping = util.getTrainIdNameMapping(connection);
 
 //Getting certification Ids
-var certificationIds = `Select Distinct * from Certification`;
-const certificationIdNameMapping = {};
+const certificationIdNameMapping = util.getCertIdNameMapping(connection);
 
-connection.query(certificationIds, (err, result) => {
-  if (err) {
-    throw err;
-  } else {
-    // console.log(result);
-    const cIds = result;
-    // console.log(eIds);
-
-    for (let entry of cIds) {
-      certificationIdNameMapping[entry["name"]] = entry["certId"];
-    }
-
-    console.log(certificationIdNameMapping);
-  }
-});
+// Calculate the requirements
+const requirements = util.calcResourceRequirements(connection);
 
 const app = express();
 app.use(express.json());
+app.use(cors({ origin: ["http://localhost:3000"] }));
+
 const PORT = 8067;
 app.listen(PORT, () => {
   console.log(`SERVER : http://localhost:${PORT}`);
@@ -117,9 +43,6 @@ app.listen(PORT, () => {
   });
 });
 
-//app.use(express.bodyParser());
-
-// mysql2.createConnection({ multipleStatements: true });
 app.get("/getResources", (req, res) => {
   var queries =
     "SELECT DISTINCT type FROM Resource;SELECT DISTINCT city FROM Location;SELECT DISTINCT name FROM Certification;SELECT DISTINCT name FROM Education;SELECT DISTINCT name FROM Profession;SELECT DISTINCT name FROM Training;";
@@ -154,61 +77,53 @@ app.get("/getResources", (req, res) => {
   });
 });
 
-//Pushing Data to DB
-
-var calculateResource = () => {
-  // const name ="name";
-  return "12-509-1079-1";
-};
-
-function calculateLocation(location) {
-  if (location in locationIdNameMapping) {
-    return locationIdNameMapping[location];
-  }
-}
-app.post("/api/volunteerData", async (req, res) => {
-  // console.log(req.body);
+app.post("/api/signUp", async (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const gender = req.body.gender;
   const age = req.body.age;
-  const phoneNumber = req.body.phoneNumber;
-  const apartmentNumber = req.body.apartmentNumber;
+  const phoneNumber = req.body.phone;
+  const apartmentNumber = req.body.apt;
   const street = req.body.street;
   const city = req.body.city;
   const state = req.body.state;
-  const zipcode = req.body.zipcode;
-  const dLNo = req.body.dLNo;
-  const role = req.body.role;
-  const passwordHash = req.body.passwordHash;
-  const salt = "test";
-  const education = req.body.education;
-  const profession = req.body.profession;
-  const training = req.body.tarining;
-  const certification = req.body.certification;
-  const rId = calculateResource();
-  const locId = calculateLocation(req.body.location);
+  const zipcode = req.body.zipCode;
+  const dLNo = req.body.dl;
+  const role = "volunteer";
+  const education = req.body.eduValue;
+  const profession = req.body.profValue;
+  const training = req.body.trainValue;
+  const certification = req.body.certValue;
+
+  // Generate random salt
+  const salt = auth.createSalt();
+  const passwordHash = auth.createHash(req.body.password, salt);
+
+  let pIds = util.convertNamesToIds(profession, professionIdNameMapping);
+  let cIds = util.convertNamesToIds(certification, certificationIdNameMapping);
+  let eIds = util.convertNamesToIds(education, educationIdNameMapping);
+  let tIds = util.convertNamesToIds(training, trainingIdNameMapping);
+
+  const rId = util.calcTypeOfResource(requirements, pIds, eIds, cIds, tIds);
+  const locId = util.calculateLocation(req.body.city, locationIdNameMapping);
+
   let vId = null;
-  // const eId = calculateEId();
+
   const vQuery = `Insert into Volunteer(name,email,gender,age,phoneNumber,apartmentNumber,street,city,state,zipcode,dLNo,role,passwordHash,salt,rId,locId) values("${name}","${email}","${gender}","${age}","${phoneNumber}","${apartmentNumber}","${street}","${city}","${state}","${zipcode}","${dLNo}","${role}","${passwordHash}","${salt}","${rId}","${locId}");`;
+
   connection.query(vQuery, (err, result) => {
     if (err) {
       throw err;
     } else {
-      console.log("posted");
-      res.json({ success: true, vid: result.insertId });
       vId = result.insertId;
-      console.log({ vId });
       for (let entry of education) {
         if (entry in educationIdNameMapping) {
           let eId = educationIdNameMapping[entry];
-          console.log(eId);
           const eQuery = `Insert into CompletedEducation(vId,eId) values("${vId}","${eId}");`;
           connection.query(eQuery, (err, result) => {
             if (err) {
               throw err;
             } else {
-              console.log("education posted");
             }
           });
         }
@@ -216,13 +131,11 @@ app.post("/api/volunteerData", async (req, res) => {
       for (let entry of profession) {
         if (entry in professionIdNameMapping) {
           let profId = professionIdNameMapping[entry];
-          console.log(profId);
-          const pQuery = `Insert into ProfHistory(vId,eId) values("${vId}","${profId}");`;
+          const pQuery = `Insert into ProfHistory(vId,profId) values("${vId}","${profId}");`;
           connection.query(pQuery, (err, result) => {
             if (err) {
               throw err;
             } else {
-              console.log("profession posted");
             }
           });
         }
@@ -230,13 +143,11 @@ app.post("/api/volunteerData", async (req, res) => {
       for (let entry of training) {
         if (entry in trainingIdNameMapping) {
           let trainId = trainingIdNameMapping[entry];
-          console.log(trainId);
-          const tQuery = `Insert into CompletedTraining(vId,eId) values("${vId}","${trainId}");`;
+          const tQuery = `Insert into CompletedTraining(vId,trainId) values("${vId}","${trainId}");`;
           connection.query(tQuery, (err, result) => {
             if (err) {
               throw err;
             } else {
-              console.log("training posted");
             }
           });
         }
@@ -244,17 +155,33 @@ app.post("/api/volunteerData", async (req, res) => {
       for (let entry of certification) {
         if (entry in certificationIdNameMapping) {
           let certId = certificationIdNameMapping[entry];
-          console.log(certId);
-          const cQuery = `Insert into CompletedEducation(vId,eId) values("${vId}","${certId}");`;
+          const cQuery = `Insert into CompletedCert(vId,certId) values("${vId}","${certId}");`;
           connection.query(cQuery, (err, result) => {
             if (err) {
               throw err;
             } else {
-              console.log("certification posted");
             }
           });
         }
       }
+
+      let tokenData = {
+        vId: vId,
+        rId: rId,
+        city: city,
+        name: name,
+        email: email,
+        role: role,
+        locId,
+        locId,
+      };
+
+      res.cookie("authToken", auth.createJWT(tokenData), {
+        maxAge: 1000 * 60 * 120,
+        httpOnly: true,
+      });
+
+      res.send({ message: "success" });
     }
   });
 });
@@ -272,7 +199,6 @@ app.post("/api/incidentData", async (req, res) => {
       console.log("incident posted");
       res.json({ success: true, incidentId: result.insertId });
       let incidentId = result.insertId;
-      console.log(incidentId);
     }
   });
 });

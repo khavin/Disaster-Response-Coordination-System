@@ -43,14 +43,14 @@ let setupQueries = {
   "Create Incident Table": `CREATE TABLE \`Incident\` (
         \`incId\` integer PRIMARY KEY auto_increment,
         \`locId\` integer NOT NULL,
-        \`startDate\` varchar(255),
-        \`endDate\` varchar(255)
+        \`startDate\` datetime,
+        \`endDate\` datetime
       );`,
   "Create Tasks Table": `CREATE TABLE \`Tasks\` (
         \`vId\` integer,
         \`incId\` integer,
-        \`startDate\` integer NOT NULL,
-        \`endDate\` integer NOT NULL,
+        \`startDate\` datetime,
+        \`endDate\` datetime,
         PRIMARY KEY (\`vId\`, \`incId\`)
       );`,
   "Create ResourceRequests Table": `CREATE TABLE \`ResourceRequests\` (

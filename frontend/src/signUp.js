@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   // use navigate hook
   const navigate = useNavigate();
-
+  const [eOptions, setEOptions] = useState([]);
+  const [certOptions, setCertOptions] = useState([]);
+  const [trainingOptions, setTrainingOptions] = useState([]);
+  const [profOptions, setProfOptions] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
+  const [dataAvail, setDataAvail] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
   // form states
   const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
@@ -24,76 +30,58 @@ export default function SignUp() {
   const [eduValue, setEduValue] = useState("");
   const [profValue, setProfValue] = useState("");
 
-  const eOptions = [
-    {
-      value: "Bachelor of Science in Nursing",
-      label: "Bachelor of Science in Nursing",
-    },
-    {
-      value: "Nursing - Specialty Preparation",
-      label: "Nursing - Specialty Preparation",
-    },
-    {
-      value: "Graduate of an accredited nursing program",
-      label: "Graduate of an accredited nursing program",
-    },
-  ];
+  useEffect(() => {
+    if (dataLoading == false) {
+      setDataLoading(true);
 
-  const certOptions = [
-    {
-      value:
-        "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level II",
-      label:
-        "AHJ certification equivalent to NFPA 1001: Standard for Fire Fighter Professional Qualifications, Firefighter Level II",
-    },
-    {
-      value: "AHJ-certified EMT",
-      label: "AHJ-certified EMT",
-    },
-    {
-      value:
-        "Valid state driver’s license, with appropriate endorsements where applicable",
-      label:
-        "Valid state driver’s license, with appropriate endorsements where applicable",
-    },
-  ];
+      fetch("http://localhost:8067/getResources", {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          let temp = [];
+          for (let entry of data["Profession"]) {
+            temp.push({ label: entry, value: entry });
+          }
+          setProfOptions(temp);
 
-  const trainingOptions = [
-    {
-      value:
-        "S-200: Basic Incident Command System for Initial Response, ICS-200",
-      label:
-        "S-200: Basic Incident Command System for Initial Response, ICS-200",
-    },
-    {
-      value: "National Incident Management System, An Introduction, IS-700",
-      label: "National Incident Management System, An Introduction, IS-700",
-    },
-    {
-      value:
-        "Training in accordance with Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Materials Awareness",
-      label:
-        "Training in accordance with Occupational Safety and Health Administration (OSHA) 29 Code of Federal Regulations (CFR) Part 1910.120: Hazardous Materials Awareness",
-    },
-  ];
+          temp = [];
+          for (let entry of data["City"]) {
+            temp.push({ label: entry, value: entry });
+          }
+          setCityOptions(temp);
 
-  const profOptions = [
-    {
-      value: "Emergency driving",
-      label: "Emergency driving",
-    },
-    {
-      value: "Experience in a clinical practice setting",
-      label: "Experience in a clinical practice setting",
-    },
-    {
-      value: "Supervisory position within a healthcare setting",
-      label: "Supervisory position within a healthcare setting",
-    },
-  ];
+          temp = [];
+          for (let entry of data["Certification"]) {
+            temp.push({ label: entry, value: entry });
+          }
+          setCertOptions(temp);
+
+          temp = [];
+          for (let entry of data["Education"]) {
+            temp.push({ label: entry, value: entry });
+          }
+          setEOptions(temp);
+
+          temp = [];
+          for (let entry of data["Training"]) {
+            temp.push({ label: entry, value: entry });
+          }
+          setTrainingOptions(temp);
+
+          setDataAvail(true);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
+  }, [dataAvail, eOptions, trainingOptions, certOptions, profOptions]);
 
   const handleSubmit = async () => {
-    await fetch("http://localhost:8067/api/register", {
+    await fetch("http://localhost:8067/api/signUp", {
       method: "POST",
       body: JSON.stringify({
         name: nameValue,
@@ -104,6 +92,7 @@ export default function SignUp() {
         apt: aptValue,
         street: streetValue,
         city: cityValue,
+        state: "VA",
         zipCode: zipCodeValue,
         dl: dlValue,
         password: passValue,
@@ -119,14 +108,16 @@ export default function SignUp() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         navigate("/dashboard");
       })
       .catch((err) => {
         console.log(err.message);
-        navigate("/dashboard");
       });
   };
+
+  if (!dataAvail) {
+    return <div>Loading resources ...</div>;
+  }
 
   return (
     <div className="loginForm signUpForm">
@@ -159,6 +150,9 @@ export default function SignUp() {
           value={genderValue}
           onChange={(e) => setGenderValue(e.target.value)}
         >
+          <option value="" disabled>
+            Select Gender
+          </option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
           <option value="Other">Other</option>
@@ -207,13 +201,15 @@ export default function SignUp() {
 
         <label>City</label>
         <br></br>
-        <input
-          className="formInput"
-          type="text"
-          value={cityValue}
-          onChange={(e) => setCityValue(e.target.value)}
+        <Select
+          name="colors"
+          options={cityOptions}
+          onChange={(e) => {
+            setCityValue(e.value);
+          }}
+          className="formInput multi-select"
+          classNamePrefix="select"
         />
-        <br></br>
 
         <label>Zipcode</label>
         <br></br>
