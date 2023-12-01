@@ -18,12 +18,16 @@ export default function AllocateResources() {
     if (dataIsLoading == false && formDataAvail == false) {
       setDataIsLoading(true);
 
-      fetch("http://localhost:8067/api/getResources/" + location.state.city, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      })
+      fetch(
+        "http://localhost:8067/api/getAllocatedResources/" +
+          location.state.city,
+        {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        }
+      )
         .then((response) => response.json())
         .then((data) => {
           setDataIsLoading(false);

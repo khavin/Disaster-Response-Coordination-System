@@ -6,81 +6,47 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function DisplayResources({ id, type, title }) {
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [dataAvail, setDataAvail] = React.useState(false);
-  const [rData, setRData] = React.useState(null);
+  const [dataAvail, setDataAvail] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [rData, setRData] = useState(null);
 
   useEffect(() => {
-    if (isLoading) {
-      const timeout = setTimeout(() => {
-        if (type == "allocated") {
-          setRData({
-            Nurse: {
-              1: 5,
-              2: 3,
-            },
-            AmbulanceDriver: {
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-            },
+    if (dataLoading == false) {
+      setDataLoading(true);
+      if (type == "allocated") {
+        fetch("http://localhost:8067/api/getIncidentInfo/" + id, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setRData(data["assignedResources"]);
+            setDataAvail(true);
+          })
+          .catch((err) => {
+            console.log(err.message);
           });
-        }
-        if (type == "available") {
-          setRData({
-            Nurse: {
-              1: 5,
-              2: 3,
-              3: 10,
-            },
-            AmbulanceDriver: {
-              1: 2,
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-              2: 23,
-            },
-          });
-        }
-        if (type == "requested") {
-          setRData({
-            Nurse: {
-              1: 5,
-              2: 3,
-            },
-            AmbulanceDriver: {
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-            },
-          });
-        }
-        setIsLoading(false);
-        setDataAvail(true);
-        // The following data should come from api
-      }, 1000);
-
-      return () => clearTimeout(timeout);
+      }
+      if (type == "available") {
+      }
+      if (type == "requested") {
+      }
     }
-  }, [isLoading, dataAvail]);
-
-  if (isLoading) {
-    return <div>Fetching data ...</div>;
-  }
+  }, [dataLoading, dataAvail, rData]);
 
   if (!dataAvail) {
-    return <div>Unable to fetch data</div>;
+    return <div>Fetching data ...</div>;
   }
 
   let titleDiv = <div>{title}</div>;
   let rows = [];
   let rEmoji = {
-    Nurse: "👩‍⚕️",
-    AmbulanceDriver: "🧑‍🚒",
-    FireFighter: "🚑",
+    "Registered Nurse": "👩‍⚕️",
+    "Ambulance Operator": "🧑‍🚒",
+    "Firefighter (Structural)": "🚑",
   };
 
   for (let r in rData) {
@@ -107,9 +73,14 @@ export default function DisplayResources({ id, type, title }) {
     );
   }
 
+  if (rows.length == 0) {
+    rows.push(<div key="none">None</div>);
+  }
+
   return (
     <div className="displayResourceContainer">
       {titleDiv}
+      <br></br>
       {rows}
     </div>
   );
