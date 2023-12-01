@@ -8,109 +8,63 @@ export default function Dashboard() {
   // use navigate hook
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [dataAvail, setDataAvail] = React.useState(false);
   const [tab, setTab] = React.useState(0);
-  const [user, setUser] = React.useState(null);
+  const [dashboardData, setDashboardData] = React.useState(null);
 
-  let columns1 = ["id", "name"];
-  let data1 = [
-    [1, "khavin"],
-    [2, "Vin"],
-    [3, "khavin"],
-    [4, "Vin"],
-    [5, "khavin"],
-    [6, "Vin"],
-    [7, "khavin"],
-    [8, "Vin"],
-    [9, "khavin"],
-    [10, "Vin"],
-    [11, "khavin"],
-    [12, "Vin"],
-    [13, "khavin"],
-    [14, "Vin"],
-    [15, "khavin"],
-    [16, "Vin"],
-    [17, "khavin"],
-    [18, "Vin"],
-    [19, "khavin"],
-    [20, "Vin"],
-  ];
+  let tableColumns = ["Incident ID", "City", "Title", "Description"];
 
-  let columns2 = ["id", "full name"];
-  let data2 = [
-    [1, "lando"],
-    [2, "max"],
-    [3, "lando"],
-    [4, "max"],
-    [5, "lando"],
-    [6, "max"],
-    [7, "lando"],
-    [8, "max"],
-    [9, "lando"],
-    [10, "max"],
-    [11, "lando"],
-    [12, "max"],
-    [13, "lando"],
-    [14, "max"],
-    [15, "lando"],
-    [16, "max"],
-    [17, "lando"],
-    [18, "max"],
-    [19, "lando"],
-    [20, "max"],
-  ];
-
-  const [columns, setColumns] = React.useState(columns1);
-  const [data, setData] = React.useState(data1);
+  const [columns, setColumns] = React.useState(tableColumns);
+  const [tableData, setTableData] = React.useState(null);
 
   const handleCreateInc = async () => {
     navigate("/createIncident", {
-      state: { city: user.city, state: user.state },
+      state: { city: dashboardData["city"], state: dashboardData["state"] },
     });
   };
 
   const handleTabChange = async (tab) => {
     setTab(tab);
     if (tab == 0) {
-      setColumns(columns1);
-      setData(data1);
+      setTableData(dashboardData["currentIncAtLoc"]);
     } else {
-      setColumns(columns2);
-      setData(data2);
+      setTableData(dashboardData["allCurrentInc"]);
     }
   };
 
   useEffect(() => {
-    if (isLoading) {
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-        setDataAvail(true);
-        // The following data should come from api
-        setUser({
-          name: "Peter Parker",
-          role: "Admin",
-          city: "Norfolk",
-          state: "VA",
+    if (!isLoading) {
+      setIsLoading(true);
+      fetch("http://localhost:8067/api/getDashBoardInfo/", {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        credentials: "include",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setDashboardData(data);
+          setTableData(data["currentIncAtLoc"]);
+          setDataAvail(true);
+        })
+        .catch((err) => {
+          console.log(err.message);
         });
-      }, 1000);
-
-      return () => clearTimeout(timeout);
     }
   }, [isLoading, dataAvail]);
 
-  if (isLoading) {
+  if (!dataAvail) {
     return <div>Fetching data ...</div>;
   }
 
-  if (!dataAvail) {
-    return <div>Unable to fetch data</div>;
-  }
-
-  let greetingsE = <div className="greetingsTitle">{user.name}</div>;
+  let greetingsE = (
+    <div className="greetingsTitle">{dashboardData["name"]}</div>
+  );
   let locationE = (
     <div>
-      {user.city},&nbsp;{user.state}
+      {dashboardData["city"]},&nbsp;{dashboardData["state"]}
     </div>
   );
 
@@ -121,6 +75,41 @@ export default function Dashboard() {
       </div>
     </div>
   );
+
+  let resourceWidgets = [];
+
+  let rNameEmojiMapping = {
+    General: "🙋",
+    Nurses: "👩‍⚕️",
+    Drivers: "🚑",
+    Firefighters: "🧑‍🚒",
+  };
+  let apiNameDisplayNameMapping = {
+    General: "General",
+    Drivers: "Ambulance Operator",
+    Firefighters: "Firefighter (Structural)",
+    Nurses: "Registered Nurse",
+  };
+
+  for (let rName in apiNameDisplayNameMapping) {
+    resourceWidgets.push(
+      <span key={rName} className="widget">
+        <span>
+          Available {rName}
+          <br></br>
+          <span className="resourceEmoji">{rNameEmojiMapping[rName]}</span>
+        </span>
+        <span className="widgetCount">
+          {apiNameDisplayNameMapping[rName] in
+          dashboardData["availableResources"]
+            ? dashboardData["availableResources"][
+                apiNameDisplayNameMapping[rName]
+              ]
+            : 0}
+        </span>
+      </span>
+    );
+  }
 
   return (
     <div>
@@ -138,41 +127,24 @@ export default function Dashboard() {
             onClick={() => {
               navigate("/resourceRequests", {
                 state: {
-                  city: user.city,
+                  city: dashboardData["city"],
                 },
               });
             }}
           >
             <span>Open resource requests</span>
-            <span className="widgetCount">8</span>
-          </span>
-          <span className="widget">
-            <span>
-              Available Nurses<br></br>
-              <span className="resourceEmoji">👩‍⚕️</span>
+            <span className="widgetCount">
+              {dashboardData["openResourceRequests"]}
             </span>
-            <span className="widgetCount">10</span>
           </span>
-          <span className="widget">
-            <span>
-              Available Firefighters<br></br>
-              <span className="resourceEmoji">🧑‍🚒</span>
-            </span>
-            <span className="widgetCount">8</span>
-          </span>
-          <span className="widget">
-            <span>
-              Available drivers<br></br>
-              <span className="resourceEmoji">🚑</span>
-            </span>
-            <span className="widgetCount">8</span>
-          </span>
+          {resourceWidgets}
         </div>
         <span
           className={"incidentsSelectionTab " + (tab == 0 ? "selectedTab" : "")}
           onClick={() => handleTabChange(0)}
         >
-          Ongoing Incidents at {user.city},&nbsp;{user.state}
+          Ongoing Incidents at {dashboardData["city"]},&nbsp;
+          {dashboardData["state"]}
         </span>
         &nbsp;
         <span
@@ -184,7 +156,11 @@ export default function Dashboard() {
       </div>
       <br></br>
       <div>
-        <DataTable columns={columns} tableData={data} tab={tab}></DataTable>
+        <DataTable
+          columns={columns}
+          tableData={tableData}
+          tab={tab}
+        ></DataTable>
       </div>
     </div>
   );

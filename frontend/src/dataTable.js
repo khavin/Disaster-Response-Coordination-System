@@ -7,8 +7,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
+import { useNavigate } from "react-router-dom";
 
 export default function DataTable({ columns, tableData, tab }) {
+  const navigate = useNavigate();
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [data, setData] = React.useState(tableData.slice(0, 10));
@@ -50,7 +53,22 @@ export default function DataTable({ columns, tableData, tab }) {
         </TableCell>
       );
     }
-    body.push(<TableRow key={tab + "-" + data[i][0]}>{cells}</TableRow>);
+    body.push(
+      <TableRow
+        onClick={(e) => {
+          navigate("/incidentInfo", {
+            state: {
+              incId: data[i][0],
+              city: data[i][1],
+              state: "VA",
+            },
+          });
+        }}
+        key={tab + "-" + data[i][0]}
+      >
+        {cells}
+      </TableRow>
+    );
   }
 
   return (

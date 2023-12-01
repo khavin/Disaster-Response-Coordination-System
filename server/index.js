@@ -335,14 +335,7 @@ app.get("/api/getIncidentInfo/:incId", (req, res) => {
 app.get("/api/getAvailableResources/:city", (req, res) => {
   let locId = locationIdNameMapping[req.params["city"]];
 
-  const query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and
-  vId NOT IN 
-  (select vId From Tasks 
-  inner join 
-  (Select incId From Incident where locId = ${locId}
-  and UNIX_TIMESTAMP(startDate) <= UNIX_TIMESTAMP(NOW()) and
-  UNIX_TIMESTAMP(endDate) >= UNIX_TIMESTAMP(NOW())) as currentIncidents
-  on Tasks.incId = currentIncidents.incId) group by rId`;
+  const query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) group by rId`;
 
   connection.query(query, (err, result) => {
     if (err) throw err;
@@ -444,13 +437,7 @@ app.post("/api/allocateResources", async (req, res) => {
     for (let type in req.body.allocate[r]) {
       let rId = util.getResourceIdFromName(resourceInfo, r, type);
 
-      query += `select vId From Volunteer Where locId = ${locId} and rId="${rId}" and
-      vId NOT IN 
-      (select vId From Tasks 
-      where
-      UNIX_TIMESTAMP(startDate) <= UNIX_TIMESTAMP(NOW()) and
-      UNIX_TIMESTAMP(endDate) >= UNIX_TIMESTAMP(NOW()))
-      LIMIT ${req.body.allocate[r][type]};`;
+      query += `select vId From Volunteer Where locId = ${locId} and rId="${rId}" and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) LIMIT ${req.body.allocate[r][type]};`;
     }
   }
 
@@ -467,9 +454,16 @@ app.post("/api/allocateResources", async (req, res) => {
   connection.query(query, (err, result) => {
     if (err) throw err;
 
-    if (Object.keys(req.body.allocate).length < 2) {
+    let len = 0;
+    for (let r in req.body.allocate) {
+      for (let type in req.body.allocate[r]) {
+        len += 1;
+      }
+    }
+    if (len < 2) {
       result = [result];
     }
+
     for (let r of result) {
       for (let entry of r) {
         values.push([entry["vId"], incId, dateToday, thirtyDaysFromNow]);
@@ -482,19 +476,6 @@ app.post("/api/allocateResources", async (req, res) => {
   });
 });
 
-//current incidents at particular location.
-
-app.get("api/getIncidents/:locId", (req, res) => {
-  let locId = req.params.locId;
-  const incQuery = `Select * from Incident where locId ="${locId} and startDate <= NOW() and endDate >= NOW() "`;
-  connection.query(incQuery, (err, result) => {
-    if (err) throw err;
-    else {
-      res.send(result);
-    }
-  });
-});
-
 app.post("/api/updateRequestStatus", (req, res) => {
   let query = `UPDATE ResourceRequests SET status="${req.body.status}" WHERE reqId=${req.body.reqId}`;
 
@@ -502,6 +483,60 @@ app.post("/api/updateRequestStatus", (req, res) => {
     if (err) throw err;
     else {
       res.json({ message: "success" });
+    }
+  });
+});
+
+app.get("/api/getDashBoardInfo", (req, res) => {
+  let token = req.cookies["authToken"];
+  token = auth.decodeJWT(token);
+  let locId = locationIdNameMapping[token["city"]];
+  let response = {
+    name: token["name"],
+    role: token["role"],
+    city: token["city"],
+    state: "VA",
+    availableResources: {},
+    openResourceRequests: 0,
+    currentIncAtLoc: [],
+    allCurrentInc: [],
+  };
+
+  let query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) group by rId;SELECT COUNT(*) as Count FROM ResourceRequests WHERE locId=${locId} AND status = "Pending";Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where Incident.locId = ${locId} and startDate <= NOW() and endDate >= NOW() ORDER BY incId DESC;Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where startDate <= NOW() and endDate >= NOW() ORDER BY incId DESC;`;
+
+  connection.query(query, (err, result) => {
+    if (err) throw err;
+    else {
+      for (let entry of result[0]) {
+        let rName = resourceInfo[entry["rId"]][0];
+        if (!(rName in response["availableResources"])) {
+          response["availableResources"][rName] = 0;
+        }
+
+        response["availableResources"][rName] += entry["Count"];
+      }
+
+      response["openResourceRequests"] = result[1][0]["Count"];
+
+      for (let entry of result[2]) {
+        response["currentIncAtLoc"].push([
+          entry["incId"],
+          entry["city"],
+          entry["title"],
+          entry["description"],
+        ]);
+      }
+
+      for (let entry of result[3]) {
+        response["allCurrentInc"].push([
+          entry["incId"],
+          entry["city"],
+          entry["title"],
+          entry["description"],
+        ]);
+      }
+
+      res.json(response);
     }
   });
 });

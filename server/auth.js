@@ -27,3 +27,11 @@ export const verifyJWT = (token) => {
     return false;
   }
 };
+
+export const decodeJWT = (token) => {
+  try {
+    return jsonwebtoken.verify(token, jwtSecretKey);
+  } catch (err) {
+    return null;
+  }
+};

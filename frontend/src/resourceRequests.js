@@ -97,7 +97,7 @@ export default function ResourceRequests() {
     if (Object.keys(rData).length == 0) {
       return (
         <div>
-          <div>No resources available</div>
+          <div>No resource requests</div>
           <br></br>
           <div>
             <span
