@@ -38,35 +38,6 @@ export default function IncidentInfo() {
     }
   }, [dataLoading, dataAvail, incData]);
 
-  // useEffect(() => {
-  //   if (isLoading) {
-  //     const timeout = setTimeout(() => {
-  //       setIsLoading(false);
-  //       setDataAvail(true);
-  //       // The following data should come from api
-  //       setIncData({
-  //         incId: 5,
-  //         title: "Incident title",
-  //         desc: "Incident description",
-  //         assignedResources: {
-  //           Nurse: {
-  //             1: 5,
-  //             2: 3,
-  //           },
-  //           AmbulanceDriver: {
-  //             2: 10,
-  //           },
-  //           FireFighter: {
-  //             1: 2,
-  //           },
-  //         },
-  //       });
-  //     }, 1000);
-
-  //     return () => clearTimeout(timeout);
-  //   }
-  // }, [isLoading, dataAvail]);
-
   if (!dataAvail) {
     return <div>Fetching data ...</div>;
   }

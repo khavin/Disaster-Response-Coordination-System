@@ -23,55 +23,21 @@ export default function RequestResources() {
     if (locIsLoading == false && locDataAvail == false) {
       setLocIsLoading(true);
 
-      fetch("http://localhost:8067/api/locations", {
+      fetch("http://localhost:8067/api/getResources", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
+        credentials: "include",
       })
         .then((response) => response.json())
         .then((data) => {
           setLocIsLoading(false);
-          setLocations(data);
+          setLocations(data["City"]);
           setLocDataAvail(true);
-          console.log(data);
         })
         .catch((err) => {
           console.log(err.message);
-          setLocIsLoading(false);
-          setLocations([
-            "Alexandria",
-            "Blacksburg",
-            "Richmond",
-            "Arlington",
-            "Norfolk",
-            "Virginia Beach",
-            "Chesapeake",
-            "Newport News",
-            "Hampton",
-            "Roanoke",
-            "Lynchburg",
-            "Charlottesville",
-            "Fredericksburg",
-            "Suffolk",
-            "Portsmouth",
-            "Manassas",
-            "Danville",
-            "Harrisonburg",
-            "Leesburg",
-            "Petersburg",
-            "Winchester",
-            "Salem",
-            "Staunton",
-            "Fairfax",
-            "Herndon",
-            "Hopewell",
-            "Christiansburg",
-            "Waynesboro",
-            "Culpeper",
-            "Bristol",
-          ]);
-          setLocDataAvail(true);
         });
     }
 
@@ -82,11 +48,12 @@ export default function RequestResources() {
     ) {
       setDataIsLoading(true);
 
-      fetch("http://localhost:8067/api/getResources/" + selectedLoc, {
+      fetch("http://localhost:8067/api/getAvailableResources/" + selectedLoc, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
+        credentials: "include",
       })
         .then((response) => response.json())
         .then((data) => {
@@ -97,20 +64,6 @@ export default function RequestResources() {
         })
         .catch((err) => {
           console.log(err.message);
-          setDataIsLoading(false);
-          setFormDataAvail(true);
-          setRData({
-            Nurse: {
-              1: 5,
-              2: 3,
-            },
-            AmbulanceDriver: {
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-            },
-          });
         });
     }
   }, [
@@ -144,7 +97,12 @@ export default function RequestResources() {
   if (formDataAvail) {
     resourceForm = (
       <div>
-        <ResourceForm rData={rData} location={selectedLoc} type={"Request"} />
+        <ResourceForm
+          rData={rData}
+          location={selectedLoc}
+          type={"Request"}
+          id={location.state.incId}
+        />
       </div>
     );
   }

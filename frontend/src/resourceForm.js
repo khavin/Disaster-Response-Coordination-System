@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-export default function ResourceForm({ rData, location, type }) {
+export default function ResourceForm({ rData, location, type, id }) {
   let formDivs = [];
   let result = {};
 
@@ -13,10 +13,15 @@ export default function ResourceForm({ rData, location, type }) {
     if (type == "Request") {
       await fetch("http://localhost:8067/api/requestResources", {
         method: "POST",
-        body: JSON.stringify(result),
+        body: JSON.stringify({
+          request: result,
+          location: location,
+          incId: id,
+        }),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
+        credentials: "include",
       })
         .then((response) => response.json())
         .then((data) => {
@@ -29,10 +34,14 @@ export default function ResourceForm({ rData, location, type }) {
     } else {
       await fetch("http://localhost:8067/api/allocateResources", {
         method: "POST",
-        body: JSON.stringify(result),
+        body: JSON.stringify({
+          allocate: result,
+          incId: id,
+        }),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
+        credentials: "include",
       })
         .then((response) => response.json())
         .then((data) => {

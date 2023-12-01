@@ -3,8 +3,6 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ResourceForm from "./resourceForm";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function AllocateResources() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,13 +17,14 @@ export default function AllocateResources() {
       setDataIsLoading(true);
 
       fetch(
-        "http://localhost:8067/api/getAllocatedResources/" +
+        "http://localhost:8067/api/getAvailableResources/" +
           location.state.city,
         {
           method: "GET",
           headers: {
             "Content-type": "application/json; charset=UTF-8",
           },
+          credentials: "include",
         }
       )
         .then((response) => response.json())
@@ -63,6 +62,7 @@ export default function AllocateResources() {
           rData={rData}
           location={location.state.city}
           type={"Allocate"}
+          id={location.state.incId}
         />
       </div>
     );

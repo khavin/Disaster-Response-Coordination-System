@@ -34,7 +34,7 @@ export default function SignUp() {
     if (dataLoading == false) {
       setDataLoading(true);
 
-      fetch("http://localhost:8067/getResources", {
+      fetch("http://localhost:8067/api/getResources", {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",

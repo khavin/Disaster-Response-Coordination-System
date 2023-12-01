@@ -199,3 +199,11 @@ export const calcTypeOfResource = (
   }
   return rId;
 };
+
+export const getResourceIdFromName = (resourceInfo, name, type) => {
+  for (let rId in resourceInfo) {
+    if (resourceInfo[rId][0] === name && resourceInfo[rId][1] == type) {
+      return rId;
+    }
+  }
+};

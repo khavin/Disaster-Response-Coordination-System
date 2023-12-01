@@ -90,7 +90,7 @@ const jsonErrorHandler = (err, req, res, next) => {
 
 app.use(jsonErrorHandler);
 
-app.get("/getResources", async (req, res) => {
+app.get("/api/getResources", async (req, res) => {
   var queries =
     "SELECT DISTINCT type FROM Resource;SELECT DISTINCT city FROM Location;SELECT DISTINCT name FROM Certification;SELECT DISTINCT name FROM Education;SELECT DISTINCT name FROM Profession;SELECT DISTINCT name FROM Training;";
 
@@ -331,19 +331,65 @@ app.get("/api/getIncidentInfo/:incId", (req, res) => {
   });
 });
 
+// Get available resources
+app.get("/api/getAvailableResources/:city", (req, res) => {
+  let locId = locationIdNameMapping[req.params["city"]];
+
+  const query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and
+  vId NOT IN 
+  (select vId From Tasks 
+  inner join 
+  (Select incId From Incident where locId = ${locId}
+  and UNIX_TIMESTAMP(startDate) <= UNIX_TIMESTAMP(NOW()) and
+  UNIX_TIMESTAMP(endDate) >= UNIX_TIMESTAMP(NOW())) as currentIncidents
+  on Tasks.incId = currentIncidents.incId) group by rId`;
+
+  connection.query(query, (err, result) => {
+    if (err) throw err;
+    else {
+      let availResources = {};
+      for (let entry of result) {
+        let rName = resourceInfo[entry["rId"]][0];
+        let rType = resourceInfo[entry["rId"]][1];
+        if (!(resourceInfo[entry["rId"]][0] in availResources)) {
+          availResources[rName] = {};
+        }
+
+        availResources[rName][rType] = entry["Count"];
+      }
+      res.json(availResources);
+    }
+  });
+});
+
 //request resources
 app.post("/api/requestResources", async (req, res) => {
   let incId = req.body.incId;
-  let locId = req.body.locId;
-  let startDate = req.body.startDate;
-  let message = req.body.message;
-  let status = req.body.status;
-  const reqQuery = `Insert into ResourceRequests(incId,locId,message,status)values("${incId}","${locId}","${message}","${status}",);`;
+  let locId = locationIdNameMapping[req.body.location];
+  let status = "Pending";
+
+  const reqQuery = `Insert into ResourceRequests(incId,locId,status)values("${incId}","${locId}","${status}");`;
+
   connection.query(reqQuery, (err, result) => {
     if (err) throw err;
     else {
-      // console.log("request posted");
-      res.json({ success: true, reqId: result.insertId });
+      let reqId = result.insertId;
+      let sql = "Insert INTO RequestInfo (`reqId`,`rId`,`quantity`) VALUES ? ";
+
+      let values = [];
+      for (let r in req.body.request) {
+        for (let type in req.body.request[r]) {
+          values.push([
+            reqId,
+            util.getResourceIdFromName(resourceInfo, r, type),
+            req.body.request[r][type],
+          ]);
+        }
+      }
+      connection.query(sql, [values], function (err) {
+        if (err) throw err;
+        res.json({ reqId: reqId });
+      });
     }
   });
 });
