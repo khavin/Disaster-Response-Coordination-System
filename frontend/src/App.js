@@ -5,7 +5,7 @@ import SignUp from "./signUp.js";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./dashboard";
 import Incident from "./incident";
-import AssignResources from "./assignResources";
+import IncidentInfo from "./incidentInfo";
 import AllocateResources from "./allocateResources";
 import RequestResources from "./requestResources";
 import ResourceRequests from "./resourceRequests";
@@ -58,11 +58,11 @@ function App() {
             }
           />
           <Route
-            path="/assignResources"
+            path="/incidentInfo"
             element={
               <div>
                 <div className="dashboardTitle">Allocate/Request Resources</div>
-                <AssignResources />
+                <IncidentInfo />
               </div>
             }
           />

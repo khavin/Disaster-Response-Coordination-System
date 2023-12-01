@@ -1,6 +1,7 @@
 import mysql2 from "mysql2";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import * as auth from "./auth.js";
 import * as util from "./utilities.js";
 
@@ -30,11 +31,17 @@ const certificationIdNameMapping = util.getCertIdNameMapping(connection);
 // Calculate the requirements
 const requirements = util.calcResourceRequirements(connection);
 
+const resourceInfo = util.getResourceInfo(connection);
+
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:3000"] }));
+app.use(cookieParser());
+
+// Set cors configuration
+app.use(cors({ origin: ["http://localhost:3000"], credentials: true }));
 
 const PORT = 8067;
+// Start the server
 app.listen(PORT, () => {
   console.log(`SERVER : http://localhost:${PORT}`);
   connection.connect((err) => {
@@ -43,7 +50,47 @@ app.listen(PORT, () => {
   });
 });
 
-app.get("/getResources", (req, res) => {
+// Request/Response interceptor
+app.use((req, res, next) => {
+  try {
+    if (!(req.url == "/api/login" || req.url == "/api/signUp")) {
+      // Verify the jwt token present in cookie
+      if (
+        Object.getPrototypeOf(req.cookies) == null ||
+        req.cookies.length == 0 ||
+        !("authToken" in req.cookies) ||
+        !auth.verifyJWT(req.cookies["authToken"])
+      ) {
+        // Unauthorized access
+        // Return 401
+        let error = new Error("Unauthorized access");
+        error.statusCode = 401;
+        error.message = "Unauthorized access";
+        throw error;
+      }
+    }
+    // log the response
+    res.on("finish", () => {
+      console.log(`Request: ${req.url} Status: ${res.statusCode}`);
+    });
+
+    next();
+  } catch (error) {
+    // log the response
+    console.log(`Request: ${req.url} Status: ${error.statusCode}`);
+    next(error);
+  }
+});
+
+const jsonErrorHandler = (err, req, res, next) => {
+  res
+    .status(err.statusCode)
+    .send({ statusCode: err["statusCode"], message: err["message"] });
+};
+
+app.use(jsonErrorHandler);
+
+app.get("/getResources", async (req, res) => {
   var queries =
     "SELECT DISTINCT type FROM Resource;SELECT DISTINCT city FROM Location;SELECT DISTINCT name FROM Certification;SELECT DISTINCT name FROM Education;SELECT DISTINCT name FROM Profession;SELECT DISTINCT name FROM Training;";
 
@@ -76,7 +123,53 @@ app.get("/getResources", (req, res) => {
     res.send(txt);
   });
 });
+app.post("/api/login", async (req, res) => {
+  let userSql =
+    `Select * FROM Volunteer Where email like '` +
+    req.body.email +
+    "' Limit 1;";
 
+  connection.query(userSql, (err, result) => {
+    if (err) {
+      throw err;
+    } else {
+      if (result.length > 0) {
+        let userDetails = result[0];
+
+        let passwordHash = auth.createHash(
+          req.body.password,
+          userDetails["salt"]
+        );
+
+        if (passwordHash === userDetails["passwordHash"]) {
+          // Password verified
+
+          let tokenData = {
+            vId: userDetails["vId"],
+            rId: userDetails["rId"],
+            city: userDetails["city"],
+            name: userDetails["name"],
+            email: userDetails["email"],
+            role: userDetails["role"],
+            city: userDetails["city"],
+          };
+
+          res.cookie("authToken", auth.createJWT(tokenData), {
+            maxAge: 1000 * 60 * 120,
+            httpOnly: true,
+          });
+          res.send({ message: "Successfully authenticated" });
+        } else {
+          res.send({ message: "Invalid Username/Password" });
+        }
+      } else {
+        res.send({ message: "Invalid Username/Password" });
+      }
+    }
+  });
+});
+
+// Create a new volunteer
 app.post("/api/signUp", async (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
@@ -172,8 +265,7 @@ app.post("/api/signUp", async (req, res) => {
         name: name,
         email: email,
         role: role,
-        locId,
-        locId,
+        city: city,
       };
 
       res.cookie("authToken", auth.createJWT(tokenData), {
@@ -186,19 +278,54 @@ app.post("/api/signUp", async (req, res) => {
   });
 });
 
-//post incident to db
-app.post("/api/incidentData", async (req, res) => {
+// Create a new Incident
+app.post("/api/createIncident", async (req, res) => {
   let title = req.body.title;
   let description = req.body.description;
-  let locId = req.body.locId;
-  let startDate = req.body.startDate;
-  const incidentQuery = `Insert into Incident (title, description, locId) values("${title}","${description}","${locId}","${startDate}");`;
+  let locId = locationIdNameMapping[req.body.city];
+
+  const incidentQuery = `Insert into Incident (title, description, locId, startDate, endDate) values("${title}","${description}","${locId}",NOW(),DATE_ADD(NOW(), INTERVAL 30 DAY));`;
+
   connection.query(incidentQuery, (err, result) => {
     if (err) throw err;
     else {
-      console.log("incident posted");
       res.json({ success: true, incidentId: result.insertId });
-      let incidentId = result.insertId;
+    }
+  });
+});
+
+// Get incident info
+app.get("/api/getIncidentInfo/:incId", (req, res) => {
+  let incId = req.params["incId"];
+
+  const incidentQuery = `SELECT incId, title,description FROM Incident Where incId=${incId};SELECT rId, COUNT(*) as Count FROM Volunteer JOIN
+  (SELECT vId FROM Tasks where incId = ${incId}
+  and startDate <= NOW() and endDate >= NOW()) as assignedR
+  ON Volunteer.vId = assignedR.vId GROUP BY rId;`;
+
+  connection.query(incidentQuery, (err, result) => {
+    if (err) throw err;
+    else {
+      let responseData = {
+        incId: result[0][0]["incId"],
+        title: result[0][0]["title"],
+        desc: result[0][0]["description"],
+        assignedResources: {},
+      };
+
+      let assignedResources = {};
+      for (let entry of result[1]) {
+        let rName = resourceInfo[entry["rId"]][0];
+        let rType = resourceInfo[entry["rId"]][1];
+        if (!(resourceInfo[entry["rId"]][0] in assignedResources)) {
+          assignedResources[rName] = {};
+        }
+
+        assignedResources[rName][rType] = entry["Count"];
+      }
+
+      responseData["assignedResources"] = assignedResources;
+      res.json(responseData);
     }
   });
 });

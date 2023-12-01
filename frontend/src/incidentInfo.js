@@ -5,49 +5,70 @@ import DisplayResources from "./displayResources";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function AssignResources() {
+export default function IncidentInfo() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [dataAvail, setDataAvail] = React.useState(false);
-  const [incData, setIncData] = React.useState(null);
+  const [dataAvail, setDataAvail] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [incData, setIncData] = useState(null);
 
   useEffect(() => {
-    if (isLoading) {
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-        setDataAvail(true);
-        // The following data should come from api
-        setIncData({
-          incId: 5,
-          title: "Incident title",
-          desc: "Incident description",
-          assignedResources: {
-            Nurse: {
-              1: 5,
-              2: 3,
-            },
-            AmbulanceDriver: {
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-            },
+    if (dataLoading == false) {
+      setDataLoading(true);
+
+      fetch(
+        "http://localhost:8067/api/getIncidentInfo/" + location.state.incId,
+        {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
           },
+          credentials: "include",
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setIncData(data);
+          setDataAvail(true);
+        })
+        .catch((err) => {
+          console.log(err.message);
         });
-      }, 1000);
-
-      return () => clearTimeout(timeout);
     }
-  }, [isLoading, dataAvail]);
+  }, [dataLoading, dataAvail, incData]);
 
-  if (isLoading) {
-    return <div>Fetching data ...</div>;
-  }
+  // useEffect(() => {
+  //   if (isLoading) {
+  //     const timeout = setTimeout(() => {
+  //       setIsLoading(false);
+  //       setDataAvail(true);
+  //       // The following data should come from api
+  //       setIncData({
+  //         incId: 5,
+  //         title: "Incident title",
+  //         desc: "Incident description",
+  //         assignedResources: {
+  //           Nurse: {
+  //             1: 5,
+  //             2: 3,
+  //           },
+  //           AmbulanceDriver: {
+  //             2: 10,
+  //           },
+  //           FireFighter: {
+  //             1: 2,
+  //           },
+  //         },
+  //       });
+  //     }, 1000);
+
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [isLoading, dataAvail]);
 
   if (!dataAvail) {
-    return <div>Unable to fetch data</div>;
+    return <div>Fetching data ...</div>;
   }
 
   return (

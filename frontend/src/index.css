@@ -29,6 +29,7 @@ header {
 .registerButton {
   background-color: var(--primary-color);
   padding: 0.5rem 0.75rem;
+  border: 1px solid var(--primary-color);
   border-radius: 1rem;
   color: white;
   cursor: pointer;
@@ -37,6 +38,10 @@ header {
 }
 .registerButton > button {
   color: white;
+}
+.registerButton:hover {
+  background-color: white;
+  color: var(--primary-color);
 }
 .loginForm {
   display: flex;
@@ -222,4 +227,8 @@ header {
   justify-content: center;
   margin-right: 0.25rem;
   border: 1px solid var(--primary-color);
+}
+.errorDiv {
+  color: red;
+  margin-bottom: 1.5rem;
 }

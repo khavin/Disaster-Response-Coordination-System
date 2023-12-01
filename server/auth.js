@@ -19,5 +19,11 @@ export const createJWT = (data) => {
 };
 
 export const verifyJWT = (token) => {
-  return jsonwebtoken.verify(token, jwtSecretKey);
+  try {
+    jsonwebtoken.verify(token, jwtSecretKey);
+    // Token verified and decoded successfully
+    return true;
+  } catch (err) {
+    return false;
+  }
 };

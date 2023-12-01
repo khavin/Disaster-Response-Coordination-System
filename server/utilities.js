@@ -1,3 +1,19 @@
+export const getResourceInfo = (connection) => {
+  let rSql = "SELECT * FROM DisasterResponseCoordination.Resource;";
+
+  let resourceInfo = {};
+  connection.query(rSql, (err, result) => {
+    if (err) {
+      throw err;
+    } else {
+      for (let r of result) {
+        resourceInfo[r["rId"]] = [r["type"], r["typeNumber"]];
+      }
+    }
+  });
+  return resourceInfo;
+};
+
 export const getLocationIdNameMapping = (connection) => {
   let loc = `Select locId, city from Location;`;
   let locationIdNameMapping = {};

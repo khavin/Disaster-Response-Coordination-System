@@ -43,6 +43,8 @@ let setupQueries = {
   "Create Incident Table": `CREATE TABLE \`Incident\` (
         \`incId\` integer PRIMARY KEY auto_increment,
         \`locId\` integer NOT NULL,
+        \`title\` varchar(255) NOT NULL,
+        \`description\` varchar(255) NOT NULL,
         \`startDate\` datetime,
         \`endDate\` datetime
       );`,

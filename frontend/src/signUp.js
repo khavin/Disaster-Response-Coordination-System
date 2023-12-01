@@ -39,6 +39,7 @@ export default function SignUp() {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
+        credentials: "include",
       })
         .then((response) => response.json())
         .then((data) => {
@@ -105,6 +106,7 @@ export default function SignUp() {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
+      credentials: "include",
     })
       .then((response) => response.json())
       .then((data) => {

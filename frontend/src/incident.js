@@ -32,20 +32,20 @@ export default function Incident() {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
+      credentials: "include",
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-        navigate("/assignResources", {
+        navigate("/incidentInfo", {
           state: {
-            incId: 5,
+            incId: data["incidentId"],
             city: location.state.city,
             state: location.state.state,
           },
         });
+      })
+      .catch((err) => {
+        console.log(err.message);
       });
   };
 
