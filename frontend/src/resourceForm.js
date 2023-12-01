@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-export default function ResourceForm({ rData, location, type, id }) {
+export default function ResourceForm({ rData, location, type, id, origCity }) {
   let formDivs = [];
   let result = {};
 
@@ -37,6 +36,7 @@ export default function ResourceForm({ rData, location, type, id }) {
         body: JSON.stringify({
           allocate: result,
           incId: id,
+          location: location,
         }),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -85,6 +85,41 @@ export default function ResourceForm({ rData, location, type, id }) {
       </div>
     </div>
   );
+
+  if (Object.keys(rData).length == 0) {
+    content = (
+      <div>
+        <div>No resources available</div>
+        <br></br>
+        <div>
+          <span
+            className="actionButton"
+            onClick={(e) => {
+              navigate("/dashboard");
+            }}
+          >
+            Back to Dashboard
+          </span>
+          <br></br>
+          <span
+            className="actionButton"
+            onClick={(e) => {
+              navigate("/incidentInfo", {
+                state: {
+                  incId: id,
+                  city: origCity,
+                  state: "VA",
+                },
+              });
+            }}
+          >
+            Back to Incident
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     let verb = "Resources Requested from " + location;
     if (type != "Request") {
@@ -103,6 +138,21 @@ export default function ResourceForm({ rData, location, type, id }) {
             }}
           >
             Back to Dashboard
+          </span>
+          <br></br>
+          <span
+            className="actionButton"
+            onClick={(e) => {
+              navigate("/incidentInfo", {
+                state: {
+                  incId: id,
+                  city: origCity,
+                  state: "VA",
+                },
+              });
+            }}
+          >
+            Back to Incident
           </span>
         </div>
       </div>

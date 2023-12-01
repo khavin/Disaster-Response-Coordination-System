@@ -36,20 +36,6 @@ export default function AllocateResources() {
         })
         .catch((err) => {
           console.log(err.message);
-          setDataIsLoading(false);
-          setFormDataAvail(true);
-          setRData({
-            Nurse: {
-              1: 5,
-              2: 3,
-            },
-            AmbulanceDriver: {
-              2: 10,
-            },
-            FireFighter: {
-              1: 2,
-            },
-          });
         });
     }
   }, [dataIsLoading, formDataAvail, rData]);
@@ -63,6 +49,7 @@ export default function AllocateResources() {
           location={location.state.city}
           type={"Allocate"}
           id={location.state.incId}
+          origCity={location.state.city}
         />
       </div>
     );

@@ -60,7 +60,6 @@ export default function RequestResources() {
           setDataIsLoading(false);
           setRData(data);
           setFormDataAvail(true);
-          console.log(data);
         })
         .catch((err) => {
           console.log(err.message);
@@ -84,7 +83,11 @@ export default function RequestResources() {
     return <div>Unable to fetch data</div>;
   }
 
-  let options = [];
+  let options = [
+    <option key={"select"} value="">
+      Select Location
+    </option>,
+  ];
   for (let entry of locations) {
     options.push(
       <option key={entry} value={entry}>
@@ -102,6 +105,7 @@ export default function RequestResources() {
           location={selectedLoc}
           type={"Request"}
           id={location.state.incId}
+          origCity={location.state.city}
         />
       </div>
     );

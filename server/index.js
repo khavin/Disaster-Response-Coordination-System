@@ -394,6 +394,94 @@ app.post("/api/requestResources", async (req, res) => {
   });
 });
 
+// list of requested resources
+app.get("/api/resourceRequests/:locName", async (req, res) => {
+  let locId = locationIdNameMapping[req.params.locName];
+
+  let query = `SELECT RequestInfo.reqId, rId, quantity,reqs.incId,reqs.title,reqs.description FROM DisasterResponseCoordination.RequestInfo
+  JOIN
+  (SELECT reqId,Incident.incId,Incident.title,Incident.description FROM DisasterResponseCoordination.ResourceRequests 
+  JOIN Incident ON ResourceRequests.incId = Incident.incId
+  WHERE ResourceRequests.locId=${locId} and ResourceRequests.status ="Pending") as reqs
+  ON reqs.reqId = RequestInfo.reqId`;
+
+  connection.query(query, (err, result) => {
+    let response = {};
+    for (let entry of result) {
+      if (!(entry["reqId"] in response)) {
+        response[entry["reqId"]] = {
+          reqId: entry["reqId"],
+          incId: entry["incId"],
+          incTitle: entry["title"],
+          incDesc: entry["description"],
+          requestedResources: {},
+        };
+      }
+      let rName = resourceInfo[entry["rId"]][0];
+      let rType = resourceInfo[entry["rId"]][1];
+
+      if (!(rName in response[entry["reqId"]]["requestedResources"])) {
+        response[entry["reqId"]]["requestedResources"][rName] = {};
+      }
+
+      response[entry["reqId"]]["requestedResources"][rName][rType] =
+        entry["quantity"];
+    }
+
+    res.json(response);
+  });
+});
+
+//allocate resources
+app.post("/api/allocateResources", async (req, res) => {
+  let incId = req.body.incId;
+  let locId = locationIdNameMapping[req.body.location];
+
+  let sql = "Insert INTO Tasks (`vId`,`incId`,`startDate`,`endDate`) VALUES ? ";
+  let query = "";
+
+  for (let r in req.body.allocate) {
+    for (let type in req.body.allocate[r]) {
+      let rId = util.getResourceIdFromName(resourceInfo, r, type);
+
+      query += `select vId From Volunteer Where locId = ${locId} and rId="${rId}" and
+      vId NOT IN 
+      (select vId From Tasks 
+      where
+      UNIX_TIMESTAMP(startDate) <= UNIX_TIMESTAMP(NOW()) and
+      UNIX_TIMESTAMP(endDate) >= UNIX_TIMESTAMP(NOW()))
+      LIMIT ${req.body.allocate[r][type]};`;
+    }
+  }
+
+  let values = [];
+
+  let currentDate = new Date();
+  let dateToday = currentDate.toISOString().slice(0, 10);
+
+  let thirtyDaysFromNow = new Date(
+    currentDate.setDate(currentDate.getDate() + 30)
+  );
+  thirtyDaysFromNow = thirtyDaysFromNow.toISOString().slice(0, 10);
+
+  connection.query(query, (err, result) => {
+    if (err) throw err;
+
+    if (Object.keys(req.body.allocate).length < 2) {
+      result = [result];
+    }
+    for (let r of result) {
+      for (let entry of r) {
+        values.push([entry["vId"], incId, dateToday, thirtyDaysFromNow]);
+      }
+    }
+    connection.query(sql, [values], function (err) {
+      if (err) throw err;
+      res.json({ message: "Resources allocated." });
+    });
+  });
+});
+
 //current incidents at particular location.
 
 app.get("api/getIncidents/:locId", (req, res) => {
@@ -403,6 +491,17 @@ app.get("api/getIncidents/:locId", (req, res) => {
     if (err) throw err;
     else {
       res.send(result);
+    }
+  });
+});
+
+app.post("/api/updateRequestStatus", (req, res) => {
+  let query = `UPDATE ResourceRequests SET status="${req.body.status}" WHERE reqId=${req.body.reqId}`;
+
+  connection.query(query, (err, result) => {
+    if (err) throw err;
+    else {
+      res.json({ message: "success" });
     }
   });
 });

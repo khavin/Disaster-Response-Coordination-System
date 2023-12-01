@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function DisplayResources({ id, type, title }) {
+export default function DisplayResources({ id, type, title, additionalData }) {
+  console.log(id);
   const navigate = useNavigate();
 
   const [dataAvail, setDataAvail] = useState(false);
@@ -33,6 +34,9 @@ export default function DisplayResources({ id, type, title }) {
       if (type == "available") {
       }
       if (type == "requested") {
+        console.log(additionalData);
+        setRData(additionalData);
+        setDataAvail(true);
       }
     }
   }, [dataLoading, dataAvail, rData]);
@@ -45,8 +49,8 @@ export default function DisplayResources({ id, type, title }) {
   let rows = [];
   let rEmoji = {
     "Registered Nurse": "👩‍⚕️",
-    "Ambulance Operator": "🧑‍🚒",
-    "Firefighter (Structural)": "🚑",
+    "Ambulance Operator": "🚑",
+    "Firefighter (Structural)": "🧑‍🚒",
   };
 
   for (let r in rData) {

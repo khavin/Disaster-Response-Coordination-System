@@ -90,7 +90,7 @@ export default function Dashboard() {
         setUser({
           name: "Peter Parker",
           role: "Admin",
-          city: "Alexandria",
+          city: "Norfolk",
           state: "VA",
         });
       }, 1000);
@@ -136,7 +136,11 @@ export default function Dashboard() {
           <span
             className="widget"
             onClick={() => {
-              navigate("/resourceRequests");
+              navigate("/resourceRequests", {
+                state: {
+                  city: user.city,
+                },
+              });
             }}
           >
             <span>Open resource requests</span>

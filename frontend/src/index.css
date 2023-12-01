@@ -232,3 +232,6 @@ header {
   color: red;
   margin-bottom: 1.5rem;
 }
+.fitContent {
+  width: fit-content;
+}
