@@ -312,8 +312,8 @@ function createTeamMembersAsVolunteers() {
       rId: "0-0",
       locId: 2,
       dLNo: "1234",
-      passwordHash: "test",
-      salt: "test",
+      passwordHash: "DF0+w5DtqqcQi3FWg59D1Jb4yPNNqypA0ijRhVAQuXk=",
+      salt: "N6qXwL1sKmRmCLNLzMMpPg==",
       role: "admin",
     }),
     Object.values({
