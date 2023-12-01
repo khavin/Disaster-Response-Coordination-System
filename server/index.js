@@ -348,4 +348,15 @@ app.post("/api/requestResources", async (req, res) => {
   });
 });
 
-//available resources
+//current incidents at particular location.
+
+app.get("api/getIncidents/:locId", (req, res) => {
+  let locId = req.params.locId;
+  const incQuery = `Select * from Incident where locId ="${locId} and startDate <= NOW() and endDate >= NOW() "`;
+  connection.query(incQuery, (err, result) => {
+    if (err) throw err;
+    else {
+      res.send(result);
+    }
+  });
+});
