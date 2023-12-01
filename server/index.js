@@ -201,6 +201,7 @@ app.post("/api/signUp", async (req, res) => {
   const locId = util.calculateLocation(req.body.city, locationIdNameMapping);
 
   let vId = null;
+  let reqId = null;
 
   const vQuery = `Insert into Volunteer(name,email,gender,age,phoneNumber,apartmentNumber,street,city,state,zipcode,dLNo,role,passwordHash,salt,rId,locId) values("${name}","${email}","${gender}","${age}","${phoneNumber}","${apartmentNumber}","${street}","${city}","${state}","${zipcode}","${dLNo}","${role}","${passwordHash}","${salt}","${rId}","${locId}");`;
 
@@ -331,4 +332,20 @@ app.get("/api/getIncidentInfo/:incId", (req, res) => {
 });
 
 //request resources
+app.post("/api/requestResources", async (req, res) => {
+  let incId = req.body.incId;
+  let locId = req.body.locId;
+  let startDate = req.body.startDate;
+  let message = req.body.message;
+  let status = req.body.status;
+  const reqQuery = `Insert into ResourceRequests(incId,locId,message,status)values("${incId}","${locId}","${message}","${status}",);`;
+  connection.query(reqQuery, (err, result) => {
+    if (err) throw err;
+    else {
+      // console.log("request posted");
+      res.json({ success: true, reqId: result.insertId });
+    }
+  });
+});
+
 //available resources
