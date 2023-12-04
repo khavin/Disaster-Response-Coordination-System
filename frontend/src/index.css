@@ -5,6 +5,10 @@ body {
   font-family: "Roboto";
   margin: 0;
 }
+.customHeader {
+  display: flex;
+  justify-content: space-between;
+}
 header {
   display: flex;
   padding: 1rem 1rem;
@@ -17,6 +21,7 @@ header {
   font-size: 1.25rem;
   font-weight: 500;
   color: var(--primary-color);
+  cursor: pointer;
 }
 .homeContainer {
   margin: 1rem;
@@ -42,6 +47,19 @@ header {
 .registerButton:hover {
   background-color: white;
   color: var(--primary-color);
+}
+.createIncidentButton {
+  background-color: var(--primary-color);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 1rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+}
+.createIncidentButton > button {
+  color: white;
 }
 .loginForm {
   display: flex;

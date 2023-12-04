@@ -2,19 +2,27 @@ import "./App.css";
 import Home from "./home.js";
 import Login from "./login.js";
 import SignUp from "./signUp.js";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Dashboard from "./dashboard";
 import Incident from "./incident";
 import IncidentInfo from "./incidentInfo";
 import AllocateResources from "./allocateResources";
 import RequestResources from "./requestResources";
 import ResourceRequests from "./resourceRequests";
+import LocationInfo from "./locationInfo";
 
 function App() {
+  const navigate = useNavigate();
+
   return (
     <div className="App">
       <header>
-        <span className="site-title">
+        <span
+          className="site-title"
+          onClick={(e) => {
+            navigate("/dashboard");
+          }}
+        >
           Disaster Response Coordination System
         </span>
       </header>
@@ -43,7 +51,10 @@ function App() {
             path="/dashboard"
             element={
               <div>
-                <div className="dashboardTitle">Dashboard</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">Dashboard</div>
+                  <LocationInfo />
+                </div>
                 <Dashboard />
               </div>
             }
@@ -52,7 +63,10 @@ function App() {
             path="/createIncident"
             element={
               <div>
-                <div className="dashboardTitle">Create Incident</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">Create Incident</div>
+                  <LocationInfo />
+                </div>
                 <Incident />
               </div>
             }
@@ -61,7 +75,12 @@ function App() {
             path="/incidentInfo"
             element={
               <div>
-                <div className="dashboardTitle">Allocate/Request Resources</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">
+                    Allocate/Request Resources
+                  </div>
+                  <LocationInfo />
+                </div>
                 <IncidentInfo />
               </div>
             }
@@ -70,7 +89,10 @@ function App() {
             path="/allocateResources"
             element={
               <div>
-                <div className="dashboardTitle">Allocate Resources</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">Allocate Resources</div>
+                  <LocationInfo />
+                </div>
                 <AllocateResources />
               </div>
             }
@@ -79,7 +101,10 @@ function App() {
             path="/requestResources"
             element={
               <div>
-                <div className="dashboardTitle">Request Resources</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">Request Resources</div>
+                  <LocationInfo />
+                </div>
                 <RequestResources />
               </div>
             }
@@ -88,7 +113,11 @@ function App() {
             path="/resourceRequests"
             element={
               <div>
-                <div className="dashboardTitle">Resource Requests</div>
+                <div className="customHeader">
+                  <div className="dashboardTitle">Resource Requests</div>
+                  <LocationInfo />
+                </div>
+
                 <ResourceRequests />
               </div>
             }

@@ -48,6 +48,7 @@ export default function DisplayResources({ id, type, title, additionalData }) {
   let titleDiv = <div>{title}</div>;
   let rows = [];
   let rEmoji = {
+    General: "🙋",
     "Registered Nurse": "👩‍⚕️",
     "Ambulance Operator": "🚑",
     "Firefighter (Structural)": "🧑‍🚒",

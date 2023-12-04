@@ -330,8 +330,8 @@ function createTeamMembersAsVolunteers() {
       rId: "0-0",
       locId: 0,
       dLNo: "1234",
-      passwordHash: "DF0+w5DtqqcQi3FWg59D1Jb4yPNNqypA0ijRhVAQuXk=",
-      salt: "N6qXwL1sKmRmCLNLzMMpPg==",
+      passwordHash: "ggZ/jBgGpiAjofMxWl51NzCQySa6PxiW/B2O6i9aZCE=",
+      salt: "3f+mjmZZPI4q/W+e/J0E9Q==",
       role: "admin",
     }),
     Object.values({
@@ -348,8 +348,8 @@ function createTeamMembersAsVolunteers() {
       rId: "0-0",
       locId: 1,
       dLNo: "1234",
-      passwordHash: "DF0+w5DtqqcQi3FWg59D1Jb4yPNNqypA0ijRhVAQuXk=",
-      salt: "N6qXwL1sKmRmCLNLzMMpPg==",
+      passwordHash: "pw+5d0BQAMazY/hF9/movqBrb6VrUbptEMRfAd62Mmw=",
+      salt: "G07o1Yf7bY9fABR+MyueKw==",
       role: "admin",
     }),
   ];

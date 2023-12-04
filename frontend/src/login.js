@@ -30,6 +30,9 @@ export default function Login() {
       .then((response) => response.json())
       .then((data) => {
         if (data["message"] == "Successfully authenticated") {
+          sessionStorage.setItem("city", data["city"]);
+          sessionStorage.setItem("role", data["role"]);
+
           navigate("/dashboard");
         } else {
           setDisplayError(true);

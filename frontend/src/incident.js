@@ -68,12 +68,12 @@ export default function Incident() {
         <br></br>
         <textarea
           className="formInput"
-          type="password"
+          type="text"
           value={descValue}
           rows="5"
           onChange={handleDescChange}
         />
-        <div className="registerButton" onClick={handleSubmit}>
+        <div className="createIncidentButton" onClick={handleSubmit}>
           <LoadingButton loading={loading}>
             <span>Create Incident</span>
           </LoadingButton>

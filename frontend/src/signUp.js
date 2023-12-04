@@ -110,6 +110,8 @@ export default function SignUp() {
     })
       .then((response) => response.json())
       .then((data) => {
+        sessionStorage.setItem("city", data["city"]);
+        sessionStorage.setItem("role", data["role"]);
         navigate("/dashboard");
       })
       .catch((err) => {

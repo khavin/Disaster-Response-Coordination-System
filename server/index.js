@@ -53,7 +53,8 @@ app.listen(PORT, () => {
 // Request/Response interceptor
 app.use((req, res, next) => {
   try {
-    if (!(req.url == "/api/login" || req.url == "/api/signUp")) {
+    let allowedUrls = ["/api/getResources", "/api/login", "/api/signUp"];
+    if (!allowedUrls.includes(req.url)) {
       // Verify the jwt token present in cookie
       if (
         Object.getPrototypeOf(req.cookies) == null ||
@@ -158,7 +159,11 @@ app.post("/api/login", async (req, res) => {
             maxAge: 1000 * 60 * 120,
             httpOnly: true,
           });
-          res.send({ message: "Successfully authenticated" });
+          res.send({
+            message: "Successfully authenticated",
+            city: userDetails["city"],
+            role: userDetails["role"],
+          });
         } else {
           res.send({ message: "Invalid Username/Password" });
         }
@@ -274,7 +279,7 @@ app.post("/api/signUp", async (req, res) => {
         httpOnly: true,
       });
 
-      res.send({ message: "success" });
+      res.send({ message: "success", city: city, role: role });
     }
   });
 });
@@ -285,7 +290,7 @@ app.post("/api/createIncident", async (req, res) => {
   let description = req.body.description;
   let locId = locationIdNameMapping[req.body.city];
 
-  const incidentQuery = `Insert into Incident (title, description, locId, startDate, endDate) values("${title}","${description}","${locId}",NOW(),DATE_ADD(NOW(), INTERVAL 30 DAY));`;
+  const incidentQuery = `Insert into Incident (title, description, locId, startDate, endDate) values("${title}","${description}","${locId}",UTC_TIMESTAMP(),DATE_ADD(UTC_TIMESTAMP(), INTERVAL 30 DAY));`;
 
   connection.query(incidentQuery, (err, result) => {
     if (err) throw err;
@@ -301,7 +306,7 @@ app.get("/api/getIncidentInfo/:incId", (req, res) => {
 
   const incidentQuery = `SELECT incId, title,description FROM Incident Where incId=${incId};SELECT rId, COUNT(*) as Count FROM Volunteer JOIN
   (SELECT vId FROM Tasks where incId = ${incId}
-  and startDate <= NOW() and endDate >= NOW()) as assignedR
+  and startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP()) as assignedR
   ON Volunteer.vId = assignedR.vId GROUP BY rId;`;
 
   connection.query(incidentQuery, (err, result) => {
@@ -335,7 +340,7 @@ app.get("/api/getIncidentInfo/:incId", (req, res) => {
 app.get("/api/getAvailableResources/:city", (req, res) => {
   let locId = locationIdNameMapping[req.params["city"]];
 
-  const query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) group by rId`;
+  const query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP()) group by rId`;
 
   connection.query(query, (err, result) => {
     if (err) throw err;
@@ -437,7 +442,7 @@ app.post("/api/allocateResources", async (req, res) => {
     for (let type in req.body.allocate[r]) {
       let rId = util.getResourceIdFromName(resourceInfo, r, type);
 
-      query += `select vId From Volunteer Where locId = ${locId} and rId="${rId}" and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) LIMIT ${req.body.allocate[r][type]};`;
+      query += `select vId From Volunteer Where locId = ${locId} and rId="${rId}" and vId NOT IN (select vId From Tasks where startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP()) LIMIT ${req.body.allocate[r][type]};`;
     }
   }
 
@@ -491,52 +496,114 @@ app.get("/api/getDashBoardInfo", (req, res) => {
   let token = req.cookies["authToken"];
   token = auth.decodeJWT(token);
   let locId = locationIdNameMapping[token["city"]];
-  let response = {
-    name: token["name"],
-    role: token["role"],
-    city: token["city"],
-    state: "VA",
-    availableResources: {},
-    openResourceRequests: 0,
-    currentIncAtLoc: [],
-    allCurrentInc: [],
-  };
 
-  let query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= NOW() and endDate >= NOW()) group by rId;SELECT COUNT(*) as Count FROM ResourceRequests WHERE locId=${locId} AND status = "Pending";Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where Incident.locId = ${locId} and startDate <= NOW() and endDate >= NOW() ORDER BY incId DESC;Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where startDate <= NOW() and endDate >= NOW() ORDER BY incId DESC;`;
+  if (token["role"] == "admin") {
+    let response = {
+      name: token["name"],
+      role: token["role"],
+      city: token["city"],
+      state: "VA",
+      availableResources: {},
+      openResourceRequests: 0,
+      currentIncAtLoc: [],
+      allCurrentInc: [],
+      requests: [],
+    };
 
-  connection.query(query, (err, result) => {
-    if (err) throw err;
-    else {
-      for (let entry of result[0]) {
-        let rName = resourceInfo[entry["rId"]][0];
-        if (!(rName in response["availableResources"])) {
-          response["availableResources"][rName] = 0;
+    let query = `select rId, count(*) as Count From Volunteer Where locId = ${locId} and vId NOT IN (select vId From Tasks where startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP()) group by rId;SELECT COUNT(*) as Count FROM ResourceRequests WHERE locId=${locId} AND status = "Pending";Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where Incident.locId = ${locId} and startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP() ORDER BY incId DESC;Select incId, title, description, city from Incident JOIN Location ON Incident.locId = Location.locId where startDate <= UTC_TIMESTAMP() and endDate >= UTC_TIMESTAMP() ORDER BY incId DESC;SELECT reqId,incId,status,title,description,city FROM Location JOIN (SELECT reqId,ResourceRequests.incId,ResourceRequests.locId,status,title,description FROM ResourceRequests JOIN Incident ON ResourceRequests.incId=Incident.incId WHERE Incident.locId=${locId}) as req ON Location.locId = req.locId;`;
+
+    connection.query(query, (err, result) => {
+      if (err) throw err;
+      else {
+        for (let entry of result[0]) {
+          let rName = resourceInfo[entry["rId"]][0];
+          if (!(rName in response["availableResources"])) {
+            response["availableResources"][rName] = 0;
+          }
+
+          response["availableResources"][rName] += entry["Count"];
         }
 
-        response["availableResources"][rName] += entry["Count"];
+        response["openResourceRequests"] = result[1][0]["Count"];
+
+        for (let entry of result[2]) {
+          response["currentIncAtLoc"].push([
+            entry["incId"],
+            entry["city"],
+            entry["title"],
+            entry["description"],
+          ]);
+        }
+
+        for (let entry of result[3]) {
+          response["allCurrentInc"].push([
+            entry["incId"],
+            entry["city"],
+            entry["title"],
+            entry["description"],
+          ]);
+        }
+
+        for (let entry of result[4]) {
+          response["requests"].push([
+            entry["reqId"],
+            entry["incId"],
+            entry["title"],
+            entry["description"],
+            entry["city"],
+            entry["status"],
+          ]);
+        }
+
+        res.json(response);
       }
+    });
+  } else {
+    let response = {
+      name: token["name"],
+      role: token["role"],
+      city: token["city"],
+      state: "VA",
+      resourceName: [
+        resourceInfo[token["rId"]][0],
+        resourceInfo[token["rId"]][1],
+      ],
+      currentIncidents: [],
+      pastIncidents: [],
+    };
 
-      response["openResourceRequests"] = result[1][0]["Count"];
+    let query = `SELECT vId, Tasks.incId, title, description, city FROM Tasks JOIN 
+    (SELECT incId, title, description, city FROM Incident JOIN Location ON Incident.locId=Location.locId) as inc
+    ON Tasks.incId = inc.incId
+    WHERE Tasks.vId="${token["vId"]}" and 
+    Tasks.startDate <= UTC_TIMESTAMP() and Tasks.endDate >= UTC_TIMESTAMP();SELECT vId, Tasks.incId, title, description, city FROM Tasks JOIN 
+    (SELECT incId, title, description, city FROM Incident JOIN Location ON Incident.locId=Location.locId) as inc
+    ON Tasks.incId = inc.incId
+    WHERE Tasks.vId="${token["vId"]}" and Tasks.endDate < UTC_TIMESTAMP();`;
 
-      for (let entry of result[2]) {
-        response["currentIncAtLoc"].push([
-          entry["incId"],
-          entry["city"],
-          entry["title"],
-          entry["description"],
-        ]);
+    connection.query(query, (err, result) => {
+      if (err) throw err;
+      else {
+        for (let entry of result[0]) {
+          response["currentIncidents"].push([
+            entry["incId"],
+            entry["city"],
+            entry["title"],
+            entry["description"],
+          ]);
+        }
+
+        for (let entry of result[1]) {
+          response["pastIncidents"].push([
+            entry["incId"],
+            entry["city"],
+            entry["title"],
+            entry["description"],
+          ]);
+        }
+
+        res.json(response);
       }
-
-      for (let entry of result[3]) {
-        response["allCurrentInc"].push([
-          entry["incId"],
-          entry["city"],
-          entry["title"],
-          entry["description"],
-        ]);
-      }
-
-      res.json(response);
-    }
-  });
+    });
+  }
 });
