@@ -59,7 +59,7 @@ export default function DisplayResources({ id, type, title, additionalData }) {
     for (let type in rData[r]) {
       let typeDiv = (
         <span className="rCountWidget" key={r + "-" + type}>
-          Type-{type} <span className="rCountWidNumber">x{rData[r][type]}</span>
+          Type-{type} <span className="rCountWidNumber">{rData[r][type]}</span>
         </span>
       );
       types.push(typeDiv);

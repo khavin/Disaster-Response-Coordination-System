@@ -162,14 +162,15 @@ header {
   color: white;
 }
 .rCountWidget {
-  background-color: var(--primary-color);
-  color: white;
+  border: 2px solid var(--primary-color);
+  background-color: white;
+  color: var(--primary-color);
   padding: 0.5rem;
   border-radius: 0.75rem;
   margin-right: 0.25rem;
 }
 .displayResourceRow {
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 .displayResourceContainer {
   display: flex;
@@ -182,7 +183,10 @@ header {
   display: flex;
 }
 .rCountWidNumber {
-  color: yellow;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
 }
 .actionButtonRow {
   display: flex;
