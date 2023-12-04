@@ -55,6 +55,7 @@ export default function DataTable({ columns, tableData, tab, clickEnabled }) {
     }
     body.push(
       <TableRow
+        className={clickEnabled ? "linkRow" : ""}
         onClick={(e) => {
           if (clickEnabled) {
             navigate("/incidentInfo", {

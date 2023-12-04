@@ -257,3 +257,6 @@ header {
 .fitContent {
   width: fit-content;
 }
+.linkRow {
+  cursor: pointer;
+}
